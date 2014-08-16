@@ -1,4 +1,4 @@
-package net.doubledoordev.D3Commands.Commands;
+package net.doubledoordev.d3command.commands;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
@@ -210,6 +210,6 @@ public class CommandTpx extends CommandBase
 
     public void tellAdmins(final ICommandSender sender, final String message, final Object... objects)
     {
-        CommandBase.func_152373_a(sender, this, "commands.op.success", new Object[] {message});
+        CommandBase.func_152373_a(sender, this, "commands.tp.success", objects);
     }
 }
