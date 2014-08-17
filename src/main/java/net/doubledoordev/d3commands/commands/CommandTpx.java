@@ -1,4 +1,4 @@
-package net.doubledoordev.d3command.commands;
+package net.doubledoordev.d3commands.commands;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;

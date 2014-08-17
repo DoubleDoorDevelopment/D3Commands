@@ -27,18 +27,29 @@ apply plugin: "forge"
 apply plugin: "maven"
 apply plugin: "idea-utils"
 
-group = "net.doubledoordev.d3command"
+group = "net.doubledoordev.d3commands"
 version = "1.0.0"
 
 targetCompatibility = 1.7
 sourceCompatibility = 1.7
 
-archivesBaseName = 'D³ Command'
+repositories {
+    maven {
+         name "DDD repo"
+         url "http://doubledoordev.net/maven/"
+     }
+}
+
+archivesBaseName = 'D3Commands'
 def githuborg = 'DoubleDoorDevelopment'
-def description = 'Some usefull command things'
+def description = 'Some useful command things'
 minecraft {
     version = "1.7.10-10.13.0.1190"
     runDir = "jars"
+}
+
+dependencies {
+    compile "net.doubledoordev.d3core:D3Core:" + project.minecraft.version + "-+:dev"
 }
 
 if (System.getenv().BUILD_NUMBER != null) version += "." + System.getenv().BUILD_NUMBER
@@ -123,7 +134,7 @@ uploadArchives {
 
                         licenses  {
                             license  {
-                                name 'MIT License'
+                                name 'New BSD License'
                                 url 'https://raw.github.com/' + githuborg + '/' + project.archivesBaseName + '/master/LICENCE.txt'
                                 distribution 'repo'
                             }

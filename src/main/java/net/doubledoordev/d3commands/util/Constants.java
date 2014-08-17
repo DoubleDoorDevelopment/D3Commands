@@ -30,7 +30,7 @@
  *
  */
 
-package net.doubledoordev.d3command.util;
+package net.doubledoordev.d3commands.util;
 
 /**
  * @author Dries007
