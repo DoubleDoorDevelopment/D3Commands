@@ -10,21 +10,18 @@ import net.doubledoordev.d3commands.commands.CommandTpx;
 import net.doubledoordev.d3core.util.ID3Mod;
 import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.common.config.Configuration;
-import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 
 import static net.doubledoordev.d3commands.util.Constants.MODID;
 import static net.doubledoordev.d3commands.util.Constants.NAME;
 
-@Mod(modid = MODID, name = NAME, dependencies = "D3Core")
+@Mod(modid = MODID, name = NAME, canBeDeactivated = false)
 public class D3Commands implements ID3Mod
 {
     @Mod.Instance(MODID)
     public static D3Commands instance;
 
-    private Logger logger;
-    private boolean debug = false;
     private boolean tps =   true;
     private boolean tpx =   true;
     private boolean kill =  true;
@@ -33,8 +30,6 @@ public class D3Commands implements ID3Mod
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event)
     {
-        logger = event.getModLog();
-
         configuration = new Configuration(event.getSuggestedConfigurationFile());
         syncConfig();
     }
