@@ -4,6 +4,7 @@ import cpw.mods.fml.client.config.IConfigElement;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
+import net.doubledoordev.d3commands.commands.CommandGetUUID;
 import net.doubledoordev.d3commands.commands.CommandKill;
 import net.doubledoordev.d3commands.commands.CommandTps;
 import net.doubledoordev.d3commands.commands.CommandTpx;
@@ -25,6 +26,7 @@ public class D3Commands implements ID3Mod
     private boolean tps =   true;
     private boolean tpx =   true;
     private boolean kill =  true;
+    private boolean getuuid = true;
     public Configuration configuration;
 
     @Mod.EventHandler
@@ -44,6 +46,7 @@ public class D3Commands implements ID3Mod
         tps = configuration.getBoolean("tps", MODID, tps, "A TPS command for all players, not just ops.");
         tpx = configuration.getBoolean("tpx", MODID, tpx, "Interdimensional TP command.");
         kill = configuration.getBoolean("kill", MODID, kill, "Allow you to kill other players.");
+        getuuid = configuration.getBoolean("getuuid", MODID, getuuid, "Allows easy UUID grabbing.");
 
         if (configuration.hasChanged()) configuration.save();
     }
@@ -57,9 +60,10 @@ public class D3Commands implements ID3Mod
     @Mod.EventHandler
     public void serverStarting(FMLServerStartingEvent event)
     {
-        if (tps)    event.registerServerCommand(new CommandTps());
-        if (tpx)    event.registerServerCommand(new CommandTpx());
-        if (kill)   event.registerServerCommand(new CommandKill());
+        if (tps)        event.registerServerCommand(new CommandTps());
+        if (tpx)        event.registerServerCommand(new CommandTpx());
+        if (kill)       event.registerServerCommand(new CommandKill());
+        if (getuuid)    event.registerServerCommand(new CommandGetUUID());
     }
 }
 
