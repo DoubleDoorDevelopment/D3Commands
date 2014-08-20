@@ -1,6 +1,7 @@
 package net.doubledoordev.d3commands.commands;
 
 import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentTranslation;
@@ -34,18 +35,19 @@ public class CommandTps extends CommandBase
             {
                 double worldTickTime = mean(MinecraftServer.getServer().worldTickTimes.get(dimId)) * 1.0E-6D;
                 double worldTPS = Math.min(1000.0/worldTickTime, 20);
-                sender.addChatMessage(new ChatComponentTranslation("commands.forge.tps.summary",String.format("Dim %d", dimId), timeFormatter.format(worldTickTime), timeFormatter.format(worldTPS)));
+                sender.addChatMessage(new ChatComponentTranslation("commands.forge.tps.summary", String.format("Dim %d", dimId), timeFormatter.format(worldTickTime), timeFormatter.format(worldTPS)));
             }
             double meanTickTime = mean(MinecraftServer.getServer().tickTimeArray) * 1.0E-6D;
             double meanTPS = Math.min(1000.0/meanTickTime, 20);
-            sender.addChatMessage(new ChatComponentTranslation("commands.forge.tps.summary","Overall", timeFormatter.format(meanTickTime), timeFormatter.format(meanTPS)));
+            sender.addChatMessage(new ChatComponentTranslation("commands.forge.tps.summary", "Overall", timeFormatter.format(meanTickTime), timeFormatter.format(meanTPS)));
         }
         else
         {
             int dim = parseInt(sender, args[0]);
+            if (DimensionManager.getWorld(dim) == null) throw new CommandException("d3.cmd.cmd.tps.dimInvalid", dim);
             double worldTickTime = mean(MinecraftServer.getServer().worldTickTimes.get(dim)) * 1.0E-6D;
             double worldTPS = Math.min(1000.0/worldTickTime, 20);
-            sender.addChatMessage(new ChatComponentTranslation("commands.forge.tps.summary",String.format("Dim %d", dim), timeFormatter.format(worldTickTime), timeFormatter.format(worldTPS)));
+            sender.addChatMessage(new ChatComponentTranslation("commands.forge.tps.summary", String.format("Dim %d", dim), timeFormatter.format(worldTickTime), timeFormatter.format(worldTPS)));
         }
     }
 
