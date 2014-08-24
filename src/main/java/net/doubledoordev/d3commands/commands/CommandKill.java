@@ -22,9 +22,13 @@ public class CommandKill extends net.minecraft.command.CommandKill
     {
         if (args.length == 1)
         {
-            final EntityPlayerMP playerDead = getPlayer(sender, args[0]);
-            playerDead.attackEntityFrom(DamageSource.outOfWorld, Float.MAX_VALUE);
-            playerDead.addChatMessage(new ChatComponentTranslation("commands.kill.success"));
+            if (sender instanceof  MinecraftServer || MinecraftServer.getServer().getConfigurationManager().func_152596_g(MinecraftServer.getServer().getConfigurationManager().func_152612_a(sender.getCommandSenderName()).getGameProfile()))
+            {
+                final EntityPlayerMP playerDead = getPlayer(sender, args[0]);
+                playerDead.attackEntityFrom(DamageSource.outOfWorld, Float.MAX_VALUE);
+                playerDead.addChatMessage(new ChatComponentTranslation("commands.kill.success"));
+            }
+            else sender.addChatMessage(new ChatComponentTranslation("commands.generic.permission"));
         }
         else
         {
