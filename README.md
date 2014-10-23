@@ -16,8 +16,10 @@ Commands to be added soon:
 * /back
 * /fly
 * /gm
+* /tpa (Use json chat formatting to accept, no command)
 * ...
 
 Other things to do:
 * Find out a good way to handle permissions for commands. Idea: built in system like essentials GroupManager
 * Maybe figure out a way to split up commands even more (Toggle commands - No args commands - Player only, ...)
+* Warps! Each warp saved to a txt file for easy edit/delete plus ingame GUI for lots of fun
