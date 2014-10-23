@@ -1,4 +1,4 @@
-D3Command
+D3Commands
 =========
 
 Some useful commands and other server admin tools. (WIP)
