@@ -4,10 +4,7 @@ import cpw.mods.fml.client.config.IConfigElement;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
-import net.doubledoordev.d3commands.commands.CommandGetUUID;
-import net.doubledoordev.d3commands.commands.CommandKill;
-import net.doubledoordev.d3commands.commands.CommandTps;
-import net.doubledoordev.d3commands.commands.CommandTpx;
+import net.doubledoordev.d3commands.commands.*;
 import net.doubledoordev.d3core.util.ID3Mod;
 import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.common.config.Configuration;
@@ -25,6 +22,7 @@ public class D3Commands implements ID3Mod
 
     private boolean tps =   true;
     private boolean tpx =   true;
+    private boolean top =   true;
     private boolean kill =  true;
     private boolean getuuid = true;
     public Configuration configuration;
@@ -45,6 +43,7 @@ public class D3Commands implements ID3Mod
 
         tps = configuration.getBoolean("tps", MODID, tps, "A TPS command for all players, not just ops.");
         tpx = configuration.getBoolean("tpx", MODID, tpx, "Interdimensional TP command.");
+        top = configuration.getBoolean("top", MODID, top, "Teleport yourself to the highest block above you.");
         kill = configuration.getBoolean("kill", MODID, kill, "Allow you to kill other players.");
         getuuid = configuration.getBoolean("getuuid", MODID, getuuid, "Allows easy UUID grabbing.");
 
@@ -62,6 +61,7 @@ public class D3Commands implements ID3Mod
     {
         if (tps)        event.registerServerCommand(new CommandTps());
         if (tpx)        event.registerServerCommand(new CommandTpx());
+        if (top)        event.registerServerCommand(new CommandTop());
         if (kill)       event.registerServerCommand(new CommandKill());
         if (getuuid)    event.registerServerCommand(new CommandGetUUID());
     }
