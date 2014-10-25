@@ -8,15 +8,15 @@ Commands currently included:
 * /kill [target player]
 * /tps [worldID]
 * /tpx <target player> <destination player> OR /tp <target player> [Dimension ID] [x] [y] [z]
+* /top
+* /heal [target player]
+* /feed [target player]
 
 Commands to be added soon:
-* /top
-* /heal
-* /feed
-* /back
 * /fly
 * /gm
 * /tpa (Use json chat formatting to accept, no command)
+* /back
 * ...
 
 Other things to do:
