@@ -60,8 +60,7 @@ public class CommandHeal extends CommandBase
             if (sender instanceof  MinecraftServer || MinecraftServer.getServer().getConfigurationManager().func_152596_g(MinecraftServer.getServer().getConfigurationManager().func_152612_a(sender.getCommandSenderName()).getGameProfile()))
             {
                 EntityPlayerMP playerHeal = getPlayer(sender, args[0]);
-                playerHeal.setHealth(20);
-                playerHeal.getFoodStats().setFoodLevel(20);
+                doHeal(playerHeal);
                 //TODO: Add succes message, need to ask dries how to get stuff from the .lang files.
             }
             else sender.addChatMessage(new ChatComponentTranslation("commands.generic.permission"));
@@ -71,14 +70,18 @@ public class CommandHeal extends CommandBase
             EntityPlayerMP playerHeal = getCommandSenderAsPlayer(sender);
             if (args.length == 0)
             {
-                playerHeal.setHealth(20);
-                playerHeal.getFoodStats().setFoodLevel(20);
+                doHeal(playerHeal);
             }
             else
             {
                 playerHeal.addChatMessage(new ChatComponentText(getCommandUsage(sender)));
             }
         }
+    }
+
+    private void doHeal(EntityPlayerMP playerHeal) {
+        playerHeal.setHealth(20);
+        playerHeal.getFoodStats().setFoodLevel(20); //Should I feed the player to?
     }
 
     @Override
