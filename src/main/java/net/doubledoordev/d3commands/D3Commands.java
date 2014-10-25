@@ -46,6 +46,7 @@ public class D3Commands implements ID3Mod
         commands.add(new CommandEntry(new CommandHeal(), configuration.getBoolean("heal", MODID, true, "Heal yourself or other players.")));
         commands.add(new CommandEntry(new CommandFeed(), configuration.getBoolean("feed", MODID, true, "Feed yourself or other players.")));
         commands.add(new CommandEntry(new CommandGetUUID(), configuration.getBoolean("getuuid", MODID, true, "Allows easy UUID grabbing.")));
+        commands.add(new CommandEntry(new CommandFly(), configuration.getBoolean("fly", MODID, true, "Toggle fly mode.")));
 
         if (configuration.hasChanged()) configuration.save();
     }

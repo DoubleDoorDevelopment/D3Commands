@@ -11,9 +11,9 @@ Commands currently included:
 * /top
 * /heal [target player]
 * /feed [target player]
+* /fly [target player]
 
 Commands to be added soon:
-* /fly
 * /gm
 * /tpa (Use json chat formatting to accept, no command)
 * /back
