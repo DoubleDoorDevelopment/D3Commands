@@ -1,21 +1,21 @@
 /*
  * Copyright (c) 2014, DoubleDoorDevelopment
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  *  Redistributions of source code must retain the above copyright notice, this
  *   list of conditions and the following disclaimer.
- * 
+ *
  *  Redistributions in binary form must reproduce the above copyright notice,
  *   this list of conditions and the following disclaimer in the documentation
  *   and/or other materials provided with the distribution.
- * 
+ *
  *  Neither the name of the project nor the names of its
  *   contributors may be used to endorse or promote products derived from
  *   this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -31,62 +31,52 @@
 package net.doubledoordev.d3commands.commands;
 
 import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.IChatComponent;
+import net.minecraftforge.common.DimensionManager;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
-public class CommandFeed extends CommandBase
+public class CommandMem extends CommandBase
 {
+
     @Override
-    public String getCommandName() {
-        return "feed";
+    public String getCommandName()
+    {
+        return "mem";
     }
 
     @Override
     public String getCommandUsage(ICommandSender icommandsender)
     {
-        return "/feed [target player]";
+        return "/mem";
     }
 
     @Override
-    public void processCommand(final ICommandSender sender, final String[] args)
+    public void processCommand(ICommandSender sender, String[] args)
     {
-        if (args.length == 1)
+        if (args.length == 0)
         {
-            if (sender instanceof  MinecraftServer || MinecraftServer.getServer().getConfigurationManager().func_152596_g(MinecraftServer.getServer().getConfigurationManager().func_152612_a(sender.getCommandSenderName()).getGameProfile()))
-            {
-                EntityPlayerMP playerFeed = getPlayer(sender, args[0]);
-                doFeed(playerFeed);
-                //TODO: Add succes message, need to ask dries how to get stuff from the .lang files.
-            }
-            else sender.addChatMessage(new ChatComponentTranslation("commands.generic.permission"));
-        }
-        else
-        {
-            EntityPlayerMP playerFeed = getCommandSenderAsPlayer(sender);
-            if (args.length == 0)
-            {
-                doFeed(playerFeed);
-            }
-            else
-            {
-                playerFeed.addChatMessage(new ChatComponentText(getCommandUsage(sender)));
-            }
-        }
-    }
+            long total = Runtime.getRuntime().totalMemory() / 1024 / 1024;
+            long max = Runtime.getRuntime().maxMemory() / 1024 / 1024;
+            long free = Runtime.getRuntime().freeMemory() / 1024 / 1024;
 
-    private void doFeed(EntityPlayerMP playerFeed) {
-        playerFeed.getFoodStats().addStats(20, 1.0F);
+            sender.addChatMessage(new ChatComponentTranslation("Currently assigned Memory: §5" + total + "MB"));
+            if(!(max == total)){
+                sender.addChatMessage(new ChatComponentTranslation("Max assignable Memory: §5" + max + "MB"));
+            }
+            sender.addChatMessage(new ChatComponentTranslation("Free assigned memory: §5" + free + "MB"));
+        }
     }
 
     @Override
-    public List addTabCompletionOptions(final ICommandSender sender, final String[] args)
+    public boolean canCommandSenderUseCommand(final ICommandSender sender)
     {
-        if (args.length == 1) return getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
-        return null;
+        return true;
     }
+
 }

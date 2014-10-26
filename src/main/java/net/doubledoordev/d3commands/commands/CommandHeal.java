@@ -81,7 +81,7 @@ public class CommandHeal extends CommandBase
 
     private void doHeal(EntityPlayerMP playerHeal) {
         playerHeal.setHealth(20);
-        playerHeal.getFoodStats().setFoodLevel(20); //Should I feed the player to?
+        playerHeal.getFoodStats().addStats(20, 1.0F); //Should I feed the player to?
     }
 
     @Override

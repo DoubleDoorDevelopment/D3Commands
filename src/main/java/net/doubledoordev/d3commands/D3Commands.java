@@ -50,6 +50,7 @@ public class D3Commands implements ID3Mod
         configuration.setCategoryRequiresWorldRestart(MODID, true);
 
         commands.add(new CommandEntry(new CommandTps(), configuration.getBoolean("tps", MODID, true, "A TPS command for all players, not just ops.")));
+        commands.add(new CommandEntry(new CommandMem(), configuration.getBoolean("mem", MODID, true, "Shows server memory information.")));
         commands.add(new CommandEntry(new CommandTpx(), configuration.getBoolean("tpx", MODID, true, "Interdimensional TP command.")));
         commands.add(new CommandEntry(new CommandTop(), configuration.getBoolean("top", MODID, true, "Teleport yourself to the highest block above you.")));
         commands.add(new CommandEntry(new CommandKill(), configuration.getBoolean("kill", MODID, true, "Allow you to kill other players.")));
