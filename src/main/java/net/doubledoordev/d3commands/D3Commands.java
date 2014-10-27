@@ -6,6 +6,7 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import net.doubledoordev.d3commands.commands.*;
 import net.doubledoordev.d3commands.event.PlayerDeathEventHandler;
+import net.doubledoordev.d3commands.util.Location;
 import net.doubledoordev.d3core.util.ID3Mod;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ChunkCoordinates;
@@ -30,7 +31,9 @@ public class D3Commands implements ID3Mod
     private List<CommandEntry> commands = new ArrayList<>();
 
     private PlayerDeathEventHandler pdEventHandler = new PlayerDeathEventHandler();
-    public Map<EntityPlayerMP, ChunkCoordinates> deathlog = new HashMap<>();
+
+    public Map<EntityPlayerMP, Location> deathlog = new HashMap<>();
+    public Map<EntityPlayerMP, Location> homes = new HashMap<>();
 
     public Configuration configuration;
 
@@ -60,6 +63,8 @@ public class D3Commands implements ID3Mod
         commands.add(new CommandEntry(new CommandFly(), configuration.getBoolean("fly", MODID, true, "Toggle fly mode.")));
         commands.add(new CommandEntry(new CommandGod(), configuration.getBoolean("god", MODID, true, "Toggle god mode.")));
         commands.add(new CommandEntry(new CommandBack(), configuration.getBoolean("back", MODID, true, "Teleport back to where you died the last time.")));
+        commands.add(new CommandEntry(new CommandSetHome(), configuration.getBoolean("sethome", MODID, true, "Set your home location.")));
+        commands.add(new CommandEntry(new CommandHome(), configuration.getBoolean("home", MODID, true, "Teleport back to your home.")));
 
         if (configuration.hasChanged()) configuration.save();
     }

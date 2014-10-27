@@ -32,56 +32,48 @@ package net.doubledoordev.d3commands.commands;
 
 import net.doubledoordev.d3commands.D3Commands;
 import net.doubledoordev.d3commands.util.Location;
-import net.minecraft.block.material.Material;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.ChatComponentText;
 
-public class CommandBack extends CommandBase
+public class CommandHome extends CommandBase
 {
     @Override
-    public String getCommandName()
-    {
-        return "back";
+    public String getCommandName() {
+        return "home";
     }
 
     @Override
     public String getCommandUsage(ICommandSender icommandsender)
     {
-        return "/back - Teleports you back to where you died the last time.";
+        return "/home";
     }
 
     @Override
-    public int getRequiredPermissionLevel()
+    public void processCommand(final ICommandSender sender, final String[] args)
     {
-        return 2;
-    }
-
-    @Override
-    public boolean isUsernameIndex(final String[] args, final int userIndex)
-    {
-        return userIndex == 0 || userIndex == 1;
-    }
-
-    @Override
-    public void processCommand(ICommandSender sender, String[] args)
-    {
-        EntityPlayerMP player =  getCommandSenderAsPlayer(sender);
-        if(D3Commands.instance.deathlog.containsKey(player)){
-            Location locto = D3Commands.instance.deathlog.get(player);
-            teleportPlayer(sender, player, locto);
-        }
-
-        System.out.println("Teleported " + player.getDisplayName() + " back to death point:" + player.getPlayerCoordinates());
-        return;
+            EntityPlayerMP player = getCommandSenderAsPlayer(sender);
+            if (args.length == 0)
+            {
+                if(D3Commands.instance.homes.containsKey(player)){
+                    teleportPlayer(player, D3Commands.instance.homes.get(player));
+                    player.addChatMessage(new ChatComponentText("Teleported back to your home."));
+                }else{
+                    player.addChatMessage(new ChatComponentText("You don't have a home set. Use /sethome"));
+                }
+            }
+            else
+            {
+                player.addChatMessage(new ChatComponentText(getCommandUsage(sender)));
+            }
     }
 
     /**
      * Teleports a player to a location
      */
-    public  void teleportPlayer(final ICommandSender sender, final EntityPlayerMP player, Location loc)
+    public  void teleportPlayer(final EntityPlayerMP player, Location loc)
     {
         int x = loc.getCoordinates().posX;
         int y = loc.getCoordinates().posY;

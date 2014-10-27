@@ -13,7 +13,10 @@ Commands currently included:
 * /feed [target player]
 * /fly [target player]
 * /god
-* /back *WARNING, does not work with multiworld deaths yet!*
+* /back
+* /mem
+* /sethome *DOES NOT SAVE OVER SERVER RESTARTS YET!*
+* /home
 
 Commands to be added soon:
 * /gm

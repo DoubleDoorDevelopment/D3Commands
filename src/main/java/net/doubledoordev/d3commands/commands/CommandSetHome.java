@@ -32,69 +32,42 @@ package net.doubledoordev.d3commands.commands;
 
 import net.doubledoordev.d3commands.D3Commands;
 import net.doubledoordev.d3commands.util.Location;
-import net.minecraft.block.material.Material;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
 
-public class CommandBack extends CommandBase
+import java.util.List;
+
+public class CommandSetHome extends CommandBase
 {
     @Override
-    public String getCommandName()
-    {
-        return "back";
+    public String getCommandName() {
+        return "sethome";
     }
 
     @Override
     public String getCommandUsage(ICommandSender icommandsender)
     {
-        return "/back - Teleports you back to where you died the last time.";
+        return "/sethome";
     }
 
     @Override
-    public int getRequiredPermissionLevel()
+    public void processCommand(final ICommandSender sender, final String[] args)
     {
-        return 2;
-    }
-
-    @Override
-    public boolean isUsernameIndex(final String[] args, final int userIndex)
-    {
-        return userIndex == 0 || userIndex == 1;
-    }
-
-    @Override
-    public void processCommand(ICommandSender sender, String[] args)
-    {
-        EntityPlayerMP player =  getCommandSenderAsPlayer(sender);
-        if(D3Commands.instance.deathlog.containsKey(player)){
-            Location locto = D3Commands.instance.deathlog.get(player);
-            teleportPlayer(sender, player, locto);
-        }
-
-        System.out.println("Teleported " + player.getDisplayName() + " back to death point:" + player.getPlayerCoordinates());
-        return;
-    }
-
-    /**
-     * Teleports a player to a location
-     */
-    public  void teleportPlayer(final ICommandSender sender, final EntityPlayerMP player, Location loc)
-    {
-        int x = loc.getCoordinates().posX;
-        int y = loc.getCoordinates().posY;
-        int z = loc.getCoordinates().posZ;
-        player.mountEntity(null);
-        if (player.dimension != loc.getDimension())
-        {
-            MinecraftServer.getServer().getConfigurationManager().transferPlayerToDimension(player, loc.getDimension());
-        }
-        player.setPositionAndUpdate(x, y, z);
-        player.prevPosX = player.posX = x;
-        player.prevPosY = player.posY = y;
-        player.prevPosZ = player.posZ = z;
+            EntityPlayerMP player = getCommandSenderAsPlayer(sender);
+            if (args.length == 0)
+            {
+                Location loc = new Location(player.getPlayerCoordinates(), player.dimension);
+                D3Commands.instance.homes.put(player, loc);
+                player.addChatMessage(new ChatComponentText("Your home has been set."));
+            }
+            else
+            {
+                player.addChatMessage(new ChatComponentText(getCommandUsage(sender)));
+            }
     }
 
 }

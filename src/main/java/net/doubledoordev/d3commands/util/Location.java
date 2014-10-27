@@ -28,30 +28,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package net.doubledoordev.d3commands.event;
+package net.doubledoordev.d3commands.util;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import net.doubledoordev.d3commands.D3Commands;
-import net.doubledoordev.d3commands.util.Location;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ChunkCoordinates;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
 
 /**
- * Created by Wout on 25/10/2014.
+ * Created by Wout on 27/10/2014.
  */
-public class PlayerDeathEventHandler {
+public class Location {
 
-    @SubscribeEvent
-    public void onPlayerDeath(LivingDeathEvent event)
-    {
-        if(event.entityLiving != null && event.entityLiving instanceof EntityPlayerMP){
-            EntityPlayerMP player = (EntityPlayerMP) event.entityLiving;
-            ChunkCoordinates coo = player.getPlayerCoordinates();
-            int dimension = player.dimension;
-            Location loc = new Location(coo, dimension);
-            D3Commands.instance.deathlog.put(player, loc);
-        }
+    private ChunkCoordinates coordinates;
+    private int dimension;
+
+    public Location(ChunkCoordinates coordinates, int dimension) {
+        this.setCoordinates(coordinates);
+        this.setDimension(dimension);
+    }
+
+    public ChunkCoordinates getCoordinates() {
+        return coordinates;
+    }
+
+    public void setCoordinates(ChunkCoordinates coordinates) {
+        this.coordinates = new ChunkCoordinates(coordinates.posX, coordinates.posY, coordinates.posZ);
+    }
+
+    public int getDimension() {
+        return dimension;
+    }
+
+    public void setDimension(int dimension) {
+        this.dimension = dimension;
     }
 
 }
