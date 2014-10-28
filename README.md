@@ -17,9 +17,9 @@ Commands currently included:
 * /mem
 * /sethome *DOES NOT SAVE OVER SERVER RESTARTS YET!*
 * /home
+* /gm
 
 Commands to be added soon:
-* /gm
 * /tpa (Use json chat formatting to accept, no command)
 * ...
 

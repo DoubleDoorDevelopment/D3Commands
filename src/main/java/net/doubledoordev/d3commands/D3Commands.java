@@ -65,6 +65,7 @@ public class D3Commands implements ID3Mod
         commands.add(new CommandEntry(new CommandBack(), configuration.getBoolean("back", MODID, true, "Teleport back to where you died the last time.")));
         commands.add(new CommandEntry(new CommandSetHome(), configuration.getBoolean("sethome", MODID, true, "Set your home location.")));
         commands.add(new CommandEntry(new CommandHome(), configuration.getBoolean("home", MODID, true, "Teleport back to your home.")));
+        commands.add(new CommandEntry(new CommandGm(), configuration.getBoolean("gm", MODID, true, "Shorter /gamemode command.")));
 
         if (configuration.hasChanged()) configuration.save();
     }
