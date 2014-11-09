@@ -61,7 +61,7 @@ public class CommandSetHome extends CommandBase
             if (args.length == 0)
             {
                 Location loc = new Location(player.getPlayerCoordinates(), player.dimension);
-                D3Commands.instance.homes.put(player, loc);
+                D3Commands.instance.homes.put(player.getUniqueID(), loc);
                 player.addChatMessage(new ChatComponentText("Your home has been set."));
             }
             else

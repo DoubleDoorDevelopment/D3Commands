@@ -1,6 +1,7 @@
 package net.doubledoordev.d3commands;
 
 import cpw.mods.fml.client.config.IConfigElement;
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
@@ -14,10 +15,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.common.config.Configuration;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static net.doubledoordev.d3commands.util.Constants.MODID;
 import static net.doubledoordev.d3commands.util.Constants.NAME;
@@ -32,8 +30,8 @@ public class D3Commands implements ID3Mod
 
     private PlayerDeathEventHandler pdEventHandler = new PlayerDeathEventHandler();
 
-    public Map<EntityPlayerMP, Location> deathlog = new HashMap<>();
-    public Map<EntityPlayerMP, Location> homes = new HashMap<>();
+    public Map<UUID, Location> deathlog = new HashMap<>();
+    public Map<UUID, Location> homes = new HashMap<>();
 
     public Configuration configuration;
 
@@ -43,6 +41,7 @@ public class D3Commands implements ID3Mod
         configuration = new Configuration(event.getSuggestedConfigurationFile());
         syncConfig();
         MinecraftForge.EVENT_BUS.register(pdEventHandler);
+        //FMLCommonHandler.instance().bus().register(pdEventHandler); Do I need this?
     }
 
     @Override

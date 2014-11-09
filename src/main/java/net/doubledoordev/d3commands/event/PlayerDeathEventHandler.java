@@ -50,7 +50,7 @@ public class PlayerDeathEventHandler {
             ChunkCoordinates coo = player.getPlayerCoordinates();
             int dimension = player.dimension;
             Location loc = new Location(coo, dimension);
-            D3Commands.instance.deathlog.put(player, loc);
+            D3Commands.instance.deathlog.put(player.getUniqueID(), loc);
         }
     }
 

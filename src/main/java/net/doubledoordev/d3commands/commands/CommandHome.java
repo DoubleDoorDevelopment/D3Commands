@@ -57,8 +57,8 @@ public class CommandHome extends CommandBase
             EntityPlayerMP player = getCommandSenderAsPlayer(sender);
             if (args.length == 0)
             {
-                if(D3Commands.instance.homes.containsKey(player)){
-                    teleportPlayer(player, D3Commands.instance.homes.get(player));
+                if(D3Commands.instance.homes.containsKey(player.getUniqueID())){
+                    teleportPlayer(player, D3Commands.instance.homes.get(player.getUniqueID()));
                     player.addChatMessage(new ChatComponentText("Teleported back to your home."));
                 }else{
                     player.addChatMessage(new ChatComponentText("You don't have a home set. Use /sethome"));

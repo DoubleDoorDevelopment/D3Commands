@@ -68,14 +68,14 @@ public class CommandBack extends CommandBase
     @Override
     public void processCommand(ICommandSender sender, String[] args)
     {
-        EntityPlayerMP player =  getCommandSenderAsPlayer(sender);
-        if(D3Commands.instance.deathlog.containsKey(player)){
-            Location locto = D3Commands.instance.deathlog.get(player);
+        EntityPlayerMP player = getCommandSenderAsPlayer(sender);
+        if(D3Commands.instance.deathlog.containsKey(player.getUniqueID())){
+            Location locto = D3Commands.instance.deathlog.get(player.getUniqueID());
             teleportPlayer(sender, player, locto);
+            System.out.println("Teleported " + player.getDisplayName() + " back to death point:" + player.getPlayerCoordinates());
+        }else{
+            System.out.println("Could not find a death point to return to for " + player.getCommandSenderName() + ".");
         }
-
-        System.out.println("Teleported " + player.getDisplayName() + " back to death point:" + player.getPlayerCoordinates());
-        return;
     }
 
     /**
