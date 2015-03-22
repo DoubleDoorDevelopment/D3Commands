@@ -1,0 +1,4 @@
+d3.cmd.config.cmd=D³Commands
+d3.cmd.config.cmd.tooltip=Включает или отключает команды
+
+d3.cmd.cmd.tps.dimInvalid=Измерение %d не существует.
