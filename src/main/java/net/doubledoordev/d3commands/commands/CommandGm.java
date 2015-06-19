@@ -30,111 +30,16 @@
 
 package net.doubledoordev.d3commands.commands;
 
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.world.WorldSettings;
-
-import java.util.ArrayList;
-import java.util.List;
+import net.minecraft.command.CommandGameMode;
 
 /**
  * Created by Wout on 28/10/2014.
  */
-public class CommandGm extends CommandBase{
-
+public class CommandGm extends CommandGameMode
+{
     @Override
-    public String getCommandName() {
+    public String getCommandName()
+    {
         return "gm";
     }
-
-    @Override
-    public String getCommandUsage(ICommandSender sender) {
-        return "/gm (mode/id) (username)";
-    }
-
-    @Override
-    public void processCommand(ICommandSender sender, String[] args) {
-        if (sender instanceof MinecraftServer || MinecraftServer.getServer().getConfigurationManager().func_152596_g(MinecraftServer.getServer().getConfigurationManager().func_152612_a(sender.getCommandSenderName()).getGameProfile())) {
-            EntityPlayerMP player;
-            switch (args.length) {
-                case 1:
-                    player = getCommandSenderAsPlayer(sender);
-                    setMode(args, player);
-                    break;
-                case 0:
-                    player = getCommandSenderAsPlayer(sender);
-                    toggleMode(player);
-                    break;
-                default:
-                    player = getCommandSenderAsPlayer(sender);
-                    player.addChatMessage(new ChatComponentText(getCommandUsage(sender)));
-                    break;
-                case 2:
-                    try {
-                        player = getPlayer(sender, args[1]);
-                    }catch(Exception e){
-                        sender.addChatMessage(new ChatComponentText("Player does not exist."));
-                        break;
-                    }
-                    setMode(args, player);
-                    break;
-            }
-        }else{
-            sender.addChatMessage(new ChatComponentTranslation("commands.generic.permission"));
-        }
-    }
-
-    private void setMode(String[] args, EntityPlayerMP player) {
-        int id;
-        try {
-            id = Integer.parseInt(args[0]);
-        }catch (Exception e){
-            id = -1;
-        }
-        if(id != -1 && id >= 0 && id <= WorldSettings.GameType.values().length) {
-            player.setGameType(WorldSettings.GameType.getByID(id));
-        }else{
-            player.setGameType(getGameModeFromString(args[0]));
-        }
-    }
-
-    private WorldSettings.GameType getGameModeFromString(String st){
-        for( WorldSettings.GameType t : WorldSettings.GameType.values()){
-            if(t.getName().equalsIgnoreCase(st)){
-                return t;
-            }
-        }
-        return WorldSettings.GameType.SURVIVAL;
-    }
-
-    private void toggleMode(EntityPlayerMP player){
-        if(player.capabilities.isCreativeMode){
-            player.setGameType(WorldSettings.GameType.SURVIVAL);
-        }else{
-            player.setGameType(WorldSettings.GameType.CREATIVE);
-        }
-    }
-
-    private List<String> getGameModes(){
-        List<String> res = new ArrayList<String>();
-        for( WorldSettings.GameType t : WorldSettings.GameType.values()){
-            res.add(t.getName());
-        }
-        return res;
-    }
-
-    @Override
-    public List addTabCompletionOptions(ICommandSender sender, String[] args)
-    {
-        List<String> res = new ArrayList<String>();
-        res.addAll(getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames()));
-        res.addAll(this.getGameModes());
-        return res;
-    }
-
-
 }

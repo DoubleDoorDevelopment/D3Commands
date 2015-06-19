@@ -42,7 +42,8 @@ import java.util.List;
 public class CommandFly extends CommandBase
 {
     @Override
-    public String getCommandName() {
+    public String getCommandName()
+    {
         return "fly";
     }
 
@@ -53,37 +54,15 @@ public class CommandFly extends CommandBase
     }
 
     @Override
-    public void processCommand(final ICommandSender sender, final String[] args)
+    public int getRequiredPermissionLevel()
     {
-        if (args.length == 1)
-        {
-            if (sender instanceof  MinecraftServer || MinecraftServer.getServer().getConfigurationManager().func_152596_g(MinecraftServer.getServer().getConfigurationManager().func_152612_a(sender.getCommandSenderName()).getGameProfile()))
-            {
-                EntityPlayerMP playerFly = getPlayer(sender, args[0]);
-                doFly(playerFly);
-                //TODO: Add succes message, need to ask dries how to get stuff from the .lang files.
-            }
-            else sender.addChatMessage(new ChatComponentTranslation("commands.generic.permission"));
-        }
-        else
-        {
-            EntityPlayerMP playerFly = getCommandSenderAsPlayer(sender);
-            if (args.length == 0)
-            {
-                doFly(playerFly);
-            }
-            else
-            {
-                playerFly.addChatMessage(new ChatComponentText(getCommandUsage(sender)));
-            }
-        }
+        return 2;
     }
 
-    private void doFly(EntityPlayerMP playerFly) {
-        playerFly.capabilities.allowFlying = !playerFly.capabilities.isFlying;
-        if (!playerFly.capabilities.allowFlying)
-            playerFly.capabilities.isFlying = false;
-        playerFly.sendPlayerAbilities();
+    @Override
+    public boolean isUsernameIndex(final String[] args, final int userIndex)
+    {
+        return userIndex == 0;
     }
 
     @Override
@@ -91,5 +70,27 @@ public class CommandFly extends CommandBase
     {
         if (args.length == 1) return getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
         return null;
+    }
+
+    @Override
+    public void processCommand(final ICommandSender sender, final String[] args)
+    {
+        EntityPlayerMP target;
+
+        if (args.length == 0) target = getCommandSenderAsPlayer(sender);
+        else target = getPlayer(sender, args[0]);
+
+        boolean on = doFly(target);
+
+        if (on) sender.addChatMessage(new ChatComponentTranslation("d3.cmd.fly.success.on", target.getDisplayName()));
+        sender.addChatMessage(new ChatComponentTranslation("d3.cmd.fly.success.off", target.getDisplayName()));
+    }
+
+    private boolean doFly(EntityPlayerMP playerFly)
+    {
+        playerFly.capabilities.allowFlying = !playerFly.capabilities.isFlying;
+        if (!playerFly.capabilities.allowFlying) playerFly.capabilities.isFlying = false;
+        playerFly.sendPlayerAbilities();
+        return playerFly.capabilities.allowFlying;
     }
 }

@@ -11,6 +11,8 @@ import java.util.List;
 
 public class CommandKill extends net.minecraft.command.CommandKill
 {
+    private static final DamageSource KILL_DAMAGE_SOURCE = new DamageSource("generic").setDamageAllowedInCreativeMode().setDamageBypassesArmor();
+
     @Override
     public String getCommandUsage(ICommandSender icommandsender)
     {
@@ -18,34 +20,15 @@ public class CommandKill extends net.minecraft.command.CommandKill
     }
 
     @Override
-    public void processCommand(final ICommandSender sender, final String[] args)
+    public int getRequiredPermissionLevel()
     {
-        if (args.length == 1)
-        {
-            if (sender instanceof  MinecraftServer || MinecraftServer.getServer().getConfigurationManager().func_152596_g(MinecraftServer.getServer().getConfigurationManager().func_152612_a(sender.getCommandSenderName()).getGameProfile()))
-            {
-                final EntityPlayerMP playerDead = getPlayer(sender, args[0]);
-                doKill(playerDead);
-            }
-            else sender.addChatMessage(new ChatComponentTranslation("commands.generic.permission"));
-        }
-        else
-        {
-            EntityPlayerMP playerDead = getCommandSenderAsPlayer(sender);
-            if (args.length == 0)
-            {
-                doKill(playerDead);
-            }
-            else
-            {
-                playerDead.addChatMessage(new ChatComponentText(getCommandUsage(sender)));
-            }
-        }
+        return 2;
     }
 
-    private void doKill(EntityPlayerMP playerDead) {
-        playerDead.attackEntityFrom(DamageSource.outOfWorld, Float.MAX_VALUE);
-        playerDead.addChatMessage(new ChatComponentTranslation("commands.kill.success"));
+    @Override
+    public boolean isUsernameIndex(final String[] args, final int userIndex)
+    {
+        return userIndex == 0;
     }
 
     @Override
@@ -53,5 +36,18 @@ public class CommandKill extends net.minecraft.command.CommandKill
     {
         if (args.length == 1) return getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
         return null;
+    }
+
+    @Override
+    public void processCommand(final ICommandSender sender, final String[] args)
+    {
+        EntityPlayerMP target;
+
+        if (args.length == 0) target = getCommandSenderAsPlayer(sender);
+        else target = getPlayer(sender, args[0]);
+
+        target.attackEntityFrom(KILL_DAMAGE_SOURCE, Float.MAX_VALUE);
+
+        sender.addChatMessage(new ChatComponentTranslation("d3.cmd.kill.success", target.getDisplayName()));
     }
 }

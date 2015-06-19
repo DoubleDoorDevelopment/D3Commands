@@ -35,47 +35,57 @@ import net.minecraft.command.CommandBase;
 /**
  * Created by Wout on 25/10/2014.
  */
-public class CommandEntry {
+public class CommandEntry
+{
 
     private CommandBase command;
     private boolean enabled;
     private String permission;
 
-    public CommandEntry(CommandBase command, boolean enabled, String permission) {
+    public CommandEntry(CommandBase command, boolean enabled, String permission)
+    {
         this.command = command;
         this.enabled = enabled;
         this.permission = permission;
     }
 
-    public CommandEntry(CommandBase command, boolean enabled) {
+    public CommandEntry(CommandBase command, boolean enabled)
+    {
         this.command = command;
         this.enabled = enabled;
     }
 
-    public CommandBase getCommand() {
+    public CommandBase getCommand()
+    {
         return command;
     }
 
-    public void setCommand(CommandBase command) {
+    public void setCommand(CommandBase command)
+    {
         this.command = command;
     }
 
-    public boolean isEnabled() {
+    public boolean isEnabled()
+    {
         return enabled;
     }
 
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(boolean enabled)
+    {
         this.enabled = enabled;
     }
 
-    public String getPermission() {
-        if(permission == null){
+    public String getPermission()
+    {
+        if (permission == null)
+        {
             return "d3.commands." + this.getCommand().getCommandName().toLowerCase();
         }
         return permission;
     }
 
-    public void setPermission(String permission) {
+    public void setPermission(String permission)
+    {
         this.permission = permission;
     }
 }

@@ -42,7 +42,8 @@ import java.util.List;
 public class CommandHeal extends CommandBase
 {
     @Override
-    public String getCommandName() {
+    public String getCommandName()
+    {
         return "heal";
     }
 
@@ -53,35 +54,15 @@ public class CommandHeal extends CommandBase
     }
 
     @Override
-    public void processCommand(final ICommandSender sender, final String[] args)
+    public int getRequiredPermissionLevel()
     {
-        if (args.length == 1)
-        {
-            if (sender instanceof  MinecraftServer || MinecraftServer.getServer().getConfigurationManager().func_152596_g(MinecraftServer.getServer().getConfigurationManager().func_152612_a(sender.getCommandSenderName()).getGameProfile()))
-            {
-                EntityPlayerMP playerHeal = getPlayer(sender, args[0]);
-                doHeal(playerHeal);
-                //TODO: Add succes message, need to ask dries how to get stuff from the .lang files.
-            }
-            else sender.addChatMessage(new ChatComponentTranslation("commands.generic.permission"));
-        }
-        else
-        {
-            EntityPlayerMP playerHeal = getCommandSenderAsPlayer(sender);
-            if (args.length == 0)
-            {
-                doHeal(playerHeal);
-            }
-            else
-            {
-                playerHeal.addChatMessage(new ChatComponentText(getCommandUsage(sender)));
-            }
-        }
+        return 2;
     }
 
-    private void doHeal(EntityPlayerMP playerHeal) {
-        playerHeal.setHealth(20);
-        playerHeal.getFoodStats().addStats(20, 1.0F); //Should I feed the player to?
+    @Override
+    public boolean isUsernameIndex(final String[] args, final int userIndex)
+    {
+        return userIndex == 0;
     }
 
     @Override
@@ -89,5 +70,23 @@ public class CommandHeal extends CommandBase
     {
         if (args.length == 1) return getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
         return null;
+    }
+
+    @Override
+    public void processCommand(final ICommandSender sender, final String[] args)
+    {
+        EntityPlayerMP target;
+
+        if (args.length == 0) target = getCommandSenderAsPlayer(sender);
+        else target = getPlayer(sender, args[0]);
+
+        doHeal(target);
+
+        sender.addChatMessage(new ChatComponentTranslation("d3.cmd.heal.success", target.getDisplayName()));
+    }
+
+    private void doHeal(EntityPlayerMP playerHeal)
+    {
+        playerHeal.setHealth(20);
     }
 }

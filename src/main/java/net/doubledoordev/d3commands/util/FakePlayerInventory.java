@@ -1,21 +1,21 @@
 /*
- * Copyright (c) 2014, DoubleDoorDevelopment
+ * Copyright (c) 2014,
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  *  Redistributions of source code must retain the above copyright notice, this
  *   list of conditions and the following disclaimer.
- * 
+ *
  *  Redistributions in binary form must reproduce the above copyright notice,
  *   this list of conditions and the following disclaimer in the documentation
  *   and/or other materials provided with the distribution.
- * 
- *  Neither the name of the project nor the names of its
+ *
+ *  Neither the name of the {organization} nor the names of its
  *   contributors may be used to endorse or promote products derived from
  *   this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,66 +26,107 @@
  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ *
  */
 
-package net.doubledoordev.d3commands.commands;
+package net.doubledoordev.d3commands.util;
 
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemStack;
 
-import java.util.List;
-
-public class CommandFeed extends CommandBase
+/**
+ * @author Dries007
+ */
+public class FakePlayerInventory implements IInventory
 {
-    @Override
-    public String getCommandName()
+    String name;
+    final ItemStack[] stacks;
+
+    public FakePlayerInventory(EntityPlayerMP inv)
     {
-        return "feed";
+        name = inv.getCommandSenderName() + " Unmodifiable!";
+        if (name.length() > 32) name = "Unmodifiable!";
+        stacks = inv.inventory.mainInventory;
     }
 
     @Override
-    public String getCommandUsage(ICommandSender icommandsender)
+    public int getSizeInventory()
     {
-        return "/feed [target player]";
+        return stacks.length;
     }
 
     @Override
-    public int getRequiredPermissionLevel()
+    public ItemStack getStackInSlot(int slot)
     {
-        return 2;
+        return stacks[slot];
     }
 
     @Override
-    public boolean isUsernameIndex(final String[] args, final int userIndex)
+    public String getInventoryName()
     {
-        return userIndex == 0;
+        return name;
     }
 
     @Override
-    public List addTabCompletionOptions(final ICommandSender sender, final String[] args)
+    public ItemStack decrStackSize(int p_70298_1_, int p_70298_2_)
     {
-        if (args.length == 1) return getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
         return null;
     }
 
     @Override
-    public void processCommand(final ICommandSender sender, final String[] args)
+    public ItemStack getStackInSlotOnClosing(int p_70304_1_)
     {
-        EntityPlayerMP target;
-
-        if (args.length == 0) target = getCommandSenderAsPlayer(sender);
-        else target = getPlayer(sender, args[0]);
-
-        doFeed(target);
-        sender.addChatMessage(new ChatComponentTranslation("d3.cmd.feed.success", target.getDisplayName()));
+        return null;
     }
 
-    private void doFeed(EntityPlayerMP playerFeed)
+    @Override
+    public void setInventorySlotContents(int p_70299_1_, ItemStack p_70299_2_)
     {
-        playerFeed.getFoodStats().addStats(20, 1.0F);
+
+    }
+
+    @Override
+    public boolean hasCustomInventoryName()
+    {
+        return true;
+    }
+
+    @Override
+    public int getInventoryStackLimit()
+    {
+        return 64;
+    }
+
+    @Override
+    public void markDirty()
+    {
+
+    }
+
+    @Override
+    public boolean isUseableByPlayer(EntityPlayer p_70300_1_)
+    {
+        return true;
+    }
+
+    @Override
+    public void openInventory()
+    {
+
+    }
+
+    @Override
+    public void closeInventory()
+    {
+
+    }
+
+    @Override
+    public boolean isItemValidForSlot(int p_94041_1_, ItemStack p_94041_2_)
+    {
+        return false;
     }
 }

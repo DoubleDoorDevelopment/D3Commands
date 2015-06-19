@@ -40,17 +40,19 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 /**
  * Created by Wout on 25/10/2014.
  */
-public class PlayerDeathEventHandler {
+public class PlayerDeathEventHandler
+{
 
     @SubscribeEvent
     public void onPlayerDeath(LivingDeathEvent event)
     {
-        if(event.entityLiving != null && event.entityLiving instanceof EntityPlayerMP){
+        if (event.entityLiving != null && event.entityLiving instanceof EntityPlayerMP)
+        {
             EntityPlayerMP player = (EntityPlayerMP) event.entityLiving;
             ChunkCoordinates coo = player.getPlayerCoordinates();
             int dimension = player.dimension;
             Location loc = new Location(coo, dimension);
-            D3Commands.instance.deathlog.put(player.getUniqueID(), loc);
+            D3Commands.instance.deathlog.put(player.getPersistentID(), loc);
         }
     }
 

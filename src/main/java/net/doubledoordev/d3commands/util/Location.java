@@ -30,35 +30,70 @@
 
 package net.doubledoordev.d3commands.util;
 
-import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.event.ClickEvent;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.*;
 
 /**
  * Created by Wout on 27/10/2014.
  */
-public class Location {
+public class Location
+{
 
     private ChunkCoordinates coordinates;
     private int dimension;
 
-    public Location(ChunkCoordinates coordinates, int dimension) {
+    public Location(ChunkCoordinates coordinates, int dimension)
+    {
         this.setCoordinates(coordinates);
         this.setDimension(dimension);
     }
 
-    public ChunkCoordinates getCoordinates() {
+    public Location(int x, int y, int z, int dimensionId)
+    {
+        this(new ChunkCoordinates(x, y, z), dimensionId);
+    }
+
+    public Location(Entity entity)
+    {
+        this(MathHelper.floor_double(entity.posX), MathHelper.floor_double(entity.posY + 0.5D), MathHelper.floor_double(entity.posZ), entity.dimension);
+    }
+
+    public ChunkCoordinates getCoordinates()
+    {
         return coordinates;
     }
 
-    public void setCoordinates(ChunkCoordinates coordinates) {
+    public void setCoordinates(ChunkCoordinates coordinates)
+    {
         this.coordinates = new ChunkCoordinates(coordinates.posX, coordinates.posY, coordinates.posZ);
     }
 
-    public int getDimension() {
+    public int getDimension()
+    {
         return dimension;
     }
 
-    public void setDimension(int dimension) {
+    public void setDimension(int dimension)
+    {
         this.dimension = dimension;
     }
 
+    public IChatComponent toClickableChatString()
+    {
+        return new ChatComponentText("[" + coordinates.posX + "X " + coordinates.posY + "Y " + coordinates.posZ + "Z]")
+                .setChatStyle(new ChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpx " + dimension + " " + coordinates.posX + " " + coordinates.posY + " " + coordinates.posZ)));
+    }
+
+    public void teleport(EntityPlayerMP player)
+    {
+        player.mountEntity(null);
+        if (player.dimension != dimension)
+        {
+            MinecraftServer.getServer().getConfigurationManager().transferPlayerToDimension(player, dimension);
+        }
+        player.setPositionAndUpdate(coordinates.posX, coordinates.posY, coordinates.posZ);
+    }
 }

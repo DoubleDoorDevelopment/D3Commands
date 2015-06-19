@@ -1,7 +1,7 @@
 package net.doubledoordev.d3commands;
 
 import cpw.mods.fml.client.config.IConfigElement;
-import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
@@ -9,8 +9,6 @@ import net.doubledoordev.d3commands.commands.*;
 import net.doubledoordev.d3commands.event.PlayerDeathEventHandler;
 import net.doubledoordev.d3commands.util.Location;
 import net.doubledoordev.d3core.util.ID3Mod;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.ChunkCoordinates;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.common.config.Configuration;
@@ -20,7 +18,7 @@ import java.util.*;
 import static net.doubledoordev.d3commands.util.Constants.MODID;
 import static net.doubledoordev.d3commands.util.Constants.NAME;
 
-@Mod(modid = MODID, name = NAME, canBeDeactivated = false)
+@Mod(modid = MODID, name = NAME, canBeDeactivated = false, acceptableRemoteVersions = "*")
 public class D3Commands implements ID3Mod
 {
     @Mod.Instance(MODID)
@@ -31,7 +29,6 @@ public class D3Commands implements ID3Mod
     private PlayerDeathEventHandler pdEventHandler = new PlayerDeathEventHandler();
 
     public Map<UUID, Location> deathlog = new HashMap<>();
-    public Map<UUID, Location> homes = new HashMap<>();
 
     public Configuration configuration;
 
@@ -62,9 +59,14 @@ public class D3Commands implements ID3Mod
         commands.add(new CommandEntry(new CommandFly(), configuration.getBoolean("fly", MODID, true, "Toggle fly mode.")));
         commands.add(new CommandEntry(new CommandGod(), configuration.getBoolean("god", MODID, true, "Toggle god mode.")));
         commands.add(new CommandEntry(new CommandBack(), configuration.getBoolean("back", MODID, true, "Teleport back to where you died the last time.")));
-        commands.add(new CommandEntry(new CommandSetHome(), configuration.getBoolean("sethome", MODID, true, "Set your home location.")));
-        commands.add(new CommandEntry(new CommandHome(), configuration.getBoolean("home", MODID, true, "Teleport back to your home.")));
         commands.add(new CommandEntry(new CommandGm(), configuration.getBoolean("gm", MODID, true, "Shorter /gamemode command.")));
+        commands.add(new CommandEntry(new CommandInvSee(), configuration.getBoolean("invsee", MODID, true, "Look at someone else's inventory")));
+        commands.add(new CommandEntry(new CommandSpawn(), configuration.getBoolean("spawn", MODID, true, "Teleport to spawn")));
+
+        if (Loader.isModLoaded("RandomThings"))
+        {
+            commands.add(new CommandEntry(new CommandKey(), configuration.getBoolean("key", MODID, true, "Give a RandomThings SpectreKey")));
+        }
 
         if (configuration.hasChanged()) configuration.save();
     }
@@ -78,8 +80,10 @@ public class D3Commands implements ID3Mod
     @Mod.EventHandler
     public void serverStarting(FMLServerStartingEvent event)
     {
-        for(CommandEntry e : commands){
-            if(e.isEnabled()){
+        for (CommandEntry e : commands)
+        {
+            if (e.isEnabled())
+            {
                 event.registerServerCommand(e.getCommand());
             }
         }

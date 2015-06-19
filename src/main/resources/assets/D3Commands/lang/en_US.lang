@@ -2,3 +2,24 @@ d3.cmd.config.cmd=D³Commands
 d3.cmd.config.cmd.tooltip=Enable or disable commands
 
 d3.cmd.cmd.tps.dimInvalid=Dimension %d doesn't exist.
+
+d3.cmd.back.success=Teleported %s back to death point
+d3.cmd.back.failed=Could not find a death point to return to for %s
+
+d3.cmd.feed.success=Fed %s
+
+d3.cmd.fly.success.on=I believe %s can fly!
+d3.cmd.fly.success.off=No more flying for %s
+
+d3.cmd.god.success.on=Godmode on for %s
+d3.cmd.god.success.off=Godmode off for %s
+
+d3.cmd.heal.success=Healed %s
+
+d3.cmd.kill.success=Killed %s
+
+d3.cmd.tp.success=Teleported %s to
+
+d3.cmd.key.success=Gave a spectre key to %s
+d3.cmd.key.failed=Spectre key doesn't seem to exists.
+

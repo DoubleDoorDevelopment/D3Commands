@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, DoubleDoorDevelopment
+ * Copyright (c) 2014,
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -12,7 +12,7 @@
  *   this list of conditions and the following disclaimer in the documentation
  *   and/or other materials provided with the distribution.
  *
- *  Neither the name of the project nor the names of its
+ *  Neither the name of the {organization} nor the names of its
  *   contributors may be used to endorse or promote products derived from
  *   this software without specific prior written permission.
  *
@@ -26,67 +26,76 @@
  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ *
  */
 
 package net.doubledoordev.d3commands.commands;
 
-import net.doubledoordev.d3commands.D3Commands;
-import net.doubledoordev.d3commands.util.Location;
+import cpw.mods.fml.common.registry.GameData;
+import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
 
-public class CommandHome extends CommandBase
+import java.util.List;
+
+public class CommandKey extends CommandBase
 {
     @Override
-    public String getCommandName() {
-        return "home";
+    public String getCommandName()
+    {
+        return "key";
     }
 
     @Override
     public String getCommandUsage(ICommandSender icommandsender)
     {
-        return "/home";
+        return "/key [target player]";
+    }
+
+    @Override
+    public boolean canCommandSenderUseCommand(ICommandSender p_71519_1_)
+    {
+        return true;
+    }
+
+    @Override
+    public boolean isUsernameIndex(final String[] args, final int userIndex)
+    {
+        return userIndex == 0;
+    }
+
+    @Override
+    public List addTabCompletionOptions(final ICommandSender sender, final String[] args)
+    {
+        if (args.length == 1) return getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
+        return null;
     }
 
     @Override
     public void processCommand(final ICommandSender sender, final String[] args)
     {
-            EntityPlayerMP player = getCommandSenderAsPlayer(sender);
-            if (args.length == 0)
-            {
-                if(D3Commands.instance.homes.containsKey(player.getUniqueID())){
-                    teleportPlayer(player, D3Commands.instance.homes.get(player.getUniqueID()));
-                    player.addChatMessage(new ChatComponentText("Teleported back to your home."));
-                }else{
-                    player.addChatMessage(new ChatComponentText("You don't have a home set. Use /sethome"));
-                }
-            }
-            else
-            {
-                player.addChatMessage(new ChatComponentText(getCommandUsage(sender)));
-            }
-    }
+        EntityPlayerMP target;
 
-    /**
-     * Teleports a player to a location
-     */
-    public  void teleportPlayer(final EntityPlayerMP player, Location loc)
-    {
-        int x = loc.getCoordinates().posX;
-        int y = loc.getCoordinates().posY;
-        int z = loc.getCoordinates().posZ;
-        player.mountEntity(null);
-        if (player.dimension != loc.getDimension())
+        if (args.length == 0) target = getCommandSenderAsPlayer(sender);
+        else target = getPlayer(sender, args[0]);
+
+        ItemStack keyStack = GameRegistry.findItemStack("RandomThings", "spectreKey", 1);
+        if (keyStack != null)
         {
-            MinecraftServer.getServer().getConfigurationManager().transferPlayerToDimension(player, loc.getDimension());
+            EntityItem entityItem = target.dropPlayerItemWithRandomChoice(keyStack, false);
+            entityItem.delayBeforeCanPickup = 0;
+            entityItem.func_145797_a(target.getCommandSenderName());
+            sender.addChatMessage(new ChatComponentTranslation("d3.cmd.key.success", target.getDisplayName()));
         }
-        player.setPositionAndUpdate(x, y, z);
-        player.prevPosX = player.posX = x;
-        player.prevPosY = player.posY = y;
-        player.prevPosZ = player.posZ = z;
+        else
+        {
+            sender.addChatMessage(new ChatComponentTranslation("d3.cmd.key.failed"));
+        }
     }
-
 }

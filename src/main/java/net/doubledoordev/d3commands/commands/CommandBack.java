@@ -32,12 +32,14 @@ package net.doubledoordev.d3commands.commands;
 
 import net.doubledoordev.d3commands.D3Commands;
 import net.doubledoordev.d3commands.util.Location;
-import net.minecraft.block.material.Material;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
+
+import java.util.List;
 
 public class CommandBack extends CommandBase
 {
@@ -62,39 +64,33 @@ public class CommandBack extends CommandBase
     @Override
     public boolean isUsernameIndex(final String[] args, final int userIndex)
     {
-        return userIndex == 0 || userIndex == 1;
+        return userIndex == 0;
+    }
+
+    @Override
+    public List addTabCompletionOptions(final ICommandSender sender, final String[] args)
+    {
+        if (args.length == 1) return getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
+        return null;
     }
 
     @Override
     public void processCommand(ICommandSender sender, String[] args)
     {
-        EntityPlayerMP player = getCommandSenderAsPlayer(sender);
-        if(D3Commands.instance.deathlog.containsKey(player.getUniqueID())){
-            Location locto = D3Commands.instance.deathlog.get(player.getUniqueID());
-            teleportPlayer(sender, player, locto);
-            System.out.println("Teleported " + player.getDisplayName() + " back to death point:" + player.getPlayerCoordinates());
-        }else{
-            System.out.println("Could not find a death point to return to for " + player.getCommandSenderName() + ".");
-        }
-    }
+        EntityPlayerMP target;
 
-    /**
-     * Teleports a player to a location
-     */
-    public  void teleportPlayer(final ICommandSender sender, final EntityPlayerMP player, Location loc)
-    {
-        int x = loc.getCoordinates().posX;
-        int y = loc.getCoordinates().posY;
-        int z = loc.getCoordinates().posZ;
-        player.mountEntity(null);
-        if (player.dimension != loc.getDimension())
+        if (args.length == 0) target = getCommandSenderAsPlayer(sender);
+        else target = getPlayer(sender, args[0]);
+
+        if (D3Commands.instance.deathlog.containsKey(target.getPersistentID()))
         {
-            MinecraftServer.getServer().getConfigurationManager().transferPlayerToDimension(player, loc.getDimension());
+            Location locto = D3Commands.instance.deathlog.get(target.getPersistentID());
+            locto.teleport(target);
+            sender.addChatMessage(new ChatComponentTranslation("d3.cmd.back.success", target.getDisplayName()).appendText(" ").appendSibling(locto.toClickableChatString()));
         }
-        player.setPositionAndUpdate(x, y, z);
-        player.prevPosX = player.posX = x;
-        player.prevPosY = player.posY = y;
-        player.prevPosZ = player.posZ = z;
+        else
+        {
+            sender.addChatMessage(new ChatComponentTranslation("d3.cmd.back.failed"));
+        }
     }
-
 }

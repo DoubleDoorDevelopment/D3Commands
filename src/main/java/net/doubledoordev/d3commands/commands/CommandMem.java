@@ -31,19 +31,11 @@
 package net.doubledoordev.d3commands.commands;
 
 import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.IChatComponent;
-import net.minecraftforge.common.DimensionManager;
-
-import java.text.DecimalFormat;
-import java.util.List;
 
 public class CommandMem extends CommandBase
 {
-
     @Override
     public String getCommandName()
     {
@@ -66,7 +58,8 @@ public class CommandMem extends CommandBase
             long free = Runtime.getRuntime().freeMemory() / 1024 / 1024;
 
             sender.addChatMessage(new ChatComponentTranslation("Currently assigned Memory: §5" + total + "MB"));
-            if(!(max == total)){
+            if (!(max == total))
+            {
                 sender.addChatMessage(new ChatComponentTranslation("Max assignable Memory: §5" + max + "MB"));
             }
             sender.addChatMessage(new ChatComponentTranslation("Free assigned memory: §5" + free + "MB"));
@@ -78,5 +71,4 @@ public class CommandMem extends CommandBase
     {
         return true;
     }
-
 }

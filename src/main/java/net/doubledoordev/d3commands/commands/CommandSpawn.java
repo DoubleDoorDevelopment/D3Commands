@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, DoubleDoorDevelopment
+ * Copyright (c) 2014,
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -12,7 +12,7 @@
  *   this list of conditions and the following disclaimer in the documentation
  *   and/or other materials provided with the distribution.
  *
- *  Neither the name of the project nor the names of its
+ *  Neither the name of the {organization} nor the names of its
  *   contributors may be used to endorse or promote products derived from
  *   this software without specific prior written permission.
  *
@@ -26,48 +26,64 @@
  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ *
  */
 
 package net.doubledoordev.d3commands.commands;
 
-import net.doubledoordev.d3commands.D3Commands;
 import net.doubledoordev.d3commands.util.Location;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatComponentTranslation;
 
 import java.util.List;
 
-public class CommandSetHome extends CommandBase
+public class CommandSpawn extends CommandBase
 {
     @Override
-    public String getCommandName() {
-        return "sethome";
+    public String getCommandName()
+    {
+        return "spawn";
     }
 
     @Override
     public String getCommandUsage(ICommandSender icommandsender)
     {
-        return "/sethome";
+        return "/spawn [target]";
     }
 
     @Override
-    public void processCommand(final ICommandSender sender, final String[] args)
+    public int getRequiredPermissionLevel()
     {
-            EntityPlayerMP player = getCommandSenderAsPlayer(sender);
-            if (args.length == 0)
-            {
-                Location loc = new Location(player.getPlayerCoordinates(), player.dimension);
-                D3Commands.instance.homes.put(player.getUniqueID(), loc);
-                player.addChatMessage(new ChatComponentText("Your home has been set."));
-            }
-            else
-            {
-                player.addChatMessage(new ChatComponentText(getCommandUsage(sender)));
-            }
+        return 2;
     }
 
+    @Override
+    public boolean isUsernameIndex(final String[] args, final int userIndex)
+    {
+        return userIndex == 0;
+    }
+
+    @Override
+    public List addTabCompletionOptions(final ICommandSender sender, final String[] args)
+    {
+        if (args.length == 1) return getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
+        return null;
+    }
+
+    @Override
+    public void processCommand(ICommandSender sender, String[] args)
+    {
+        EntityPlayerMP target;
+
+        if (args.length == 0) target = getCommandSenderAsPlayer(sender);
+        else target = getPlayer(sender, args[0]);
+
+        Location location = new Location(target.worldObj.getSpawnPoint(), target.dimension);
+        location.teleport(target);
+        sender.addChatMessage(new ChatComponentTranslation("d3.cmd.tp.success", target.getDisplayName()).appendText(" ").appendSibling(location.toClickableChatString()));
+    }
 }

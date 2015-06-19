@@ -42,7 +42,8 @@ import java.util.List;
 public class CommandGod extends CommandBase
 {
     @Override
-    public String getCommandName() {
+    public String getCommandName()
+    {
         return "god";
     }
 
@@ -53,35 +54,15 @@ public class CommandGod extends CommandBase
     }
 
     @Override
-    public void processCommand(final ICommandSender sender, final String[] args)
+    public int getRequiredPermissionLevel()
     {
-        if (args.length == 1)
-        {
-            if (sender instanceof  MinecraftServer || MinecraftServer.getServer().getConfigurationManager().func_152596_g(MinecraftServer.getServer().getConfigurationManager().func_152612_a(sender.getCommandSenderName()).getGameProfile()))
-            {
-                EntityPlayerMP playerGod = getPlayer(sender, args[0]);
-                doGod(playerGod);
-                //TODO: Add succes message, need to ask dries how to get stuff from the .lang files.
-            }
-            else sender.addChatMessage(new ChatComponentTranslation("commands.generic.permission"));
-        }
-        else
-        {
-            EntityPlayerMP playerGod = getCommandSenderAsPlayer(sender);
-            if (args.length == 0)
-            {
-                doGod(playerGod);
-            }
-            else
-            {
-                playerGod.addChatMessage(new ChatComponentText(getCommandUsage(sender)));
-            }
-        }
+        return 2;
     }
 
-    private void doGod(EntityPlayerMP playerGod) {
-        playerGod.capabilities.disableDamage = !playerGod.capabilities.disableDamage;
-        playerGod.sendPlayerAbilities();
+    @Override
+    public boolean isUsernameIndex(final String[] args, final int userIndex)
+    {
+        return userIndex == 0;
     }
 
     @Override
@@ -89,5 +70,26 @@ public class CommandGod extends CommandBase
     {
         if (args.length == 1) return getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
         return null;
+    }
+
+    @Override
+    public void processCommand(final ICommandSender sender, final String[] args)
+    {
+        EntityPlayerMP target;
+
+        if (args.length == 0) target = getCommandSenderAsPlayer(sender);
+        else target = getPlayer(sender, args[0]);
+
+        boolean on = doGod(target);
+
+        if (on) sender.addChatMessage(new ChatComponentTranslation("d3.cmd.god.success.on", target.getDisplayName()));
+        sender.addChatMessage(new ChatComponentTranslation("d3.cmd.god.success.off", target.getDisplayName()));
+    }
+
+    private boolean doGod(EntityPlayerMP playerGod)
+    {
+        playerGod.capabilities.disableDamage = !playerGod.capabilities.disableDamage;
+        playerGod.sendPlayerAbilities();
+        return playerGod.capabilities.disableDamage;
     }
 }

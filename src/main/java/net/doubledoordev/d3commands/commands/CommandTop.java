@@ -1,10 +1,15 @@
 package net.doubledoordev.d3commands.commands;
 
+import net.doubledoordev.d3commands.util.Location;
 import net.minecraft.block.material.Material;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.world.World;
+
+import java.util.List;
 
 public class CommandTop extends CommandBase
 {
@@ -17,7 +22,7 @@ public class CommandTop extends CommandBase
     @Override
     public String getCommandUsage(ICommandSender icommandsender)
     {
-        return "/top - Teleports you to the highest surface block.";
+        return "/top [target]";
     }
 
     @Override
@@ -29,38 +34,34 @@ public class CommandTop extends CommandBase
     @Override
     public boolean isUsernameIndex(final String[] args, final int userIndex)
     {
-        return userIndex == 0 || userIndex == 1;
+        return userIndex == 0;
+    }
+
+    @Override
+    public List addTabCompletionOptions(final ICommandSender sender, final String[] args)
+    {
+        if (args.length == 1) return getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
+        return null;
     }
 
     @Override
     public void processCommand(ICommandSender sender, String[] args)
     {
-        EntityPlayerMP player =  getCommandSenderAsPlayer(sender);
-        for (int y = player.getEntityWorld().getActualHeight(); y > player.getPlayerCoordinates().posY; y--)
+        EntityPlayerMP target;
+
+        if (args.length == 0) target = getCommandSenderAsPlayer(sender);
+        else target = getPlayer(sender, args[0]);
+
+        World world = target.getEntityWorld();
+        for (int y = world.getActualHeight(); y > target.getPlayerCoordinates().posY; y--)
         {
-            if (player.getEntityWorld().getBlock(player.getPlayerCoordinates().posX, y, player.getPlayerCoordinates().posZ).getMaterial() != Material.air)
+            if (world.getBlock(target.getPlayerCoordinates().posX, y, target.getPlayerCoordinates().posZ).getMaterial() != Material.air)
             {
-                teleportPlayer(sender, player, player.getEntityWorld().getWorldInfo().getVanillaDimension(), player.getPlayerCoordinates().posX, y + 2, player.getPlayerCoordinates().posZ);
-                System.out.println("Teleported " + player.getDisplayName() + " to:" + player.getPlayerCoordinates());
+                Location location = new Location(target.getPlayerCoordinates().posX, y + 2, target.getPlayerCoordinates().posZ, world.provider.dimensionId);
+                location.teleport(target);
+                sender.addChatMessage(new ChatComponentTranslation("d3.cmd.tp.success", target.getDisplayName()).appendText(" ").appendSibling(location.toClickableChatString()));
                 return;
             }
         }
     }
-
-    /**
-     * Teleports a player to coordinates
-     */
-    public  void teleportPlayer(final ICommandSender sender, final EntityPlayerMP player, final int dimension, final double x, final double y, final double z)
-    {
-        player.mountEntity(null);
-        if (player.dimension != dimension)
-        {
-            MinecraftServer.getServer().getConfigurationManager().transferPlayerToDimension(player, dimension);
-        }
-        player.setPositionAndUpdate(x, y, z);
-        player.prevPosX = player.posX = x;
-        player.prevPosY = player.posY = y;
-        player.prevPosZ = player.posZ = z;
-    }
-
 }
