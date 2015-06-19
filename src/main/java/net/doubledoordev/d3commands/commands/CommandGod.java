@@ -83,7 +83,7 @@ public class CommandGod extends CommandBase
         boolean on = doGod(target);
 
         if (on) sender.addChatMessage(new ChatComponentTranslation("d3.cmd.god.success.on", target.getDisplayName()));
-        sender.addChatMessage(new ChatComponentTranslation("d3.cmd.god.success.off", target.getDisplayName()));
+        else sender.addChatMessage(new ChatComponentTranslation("d3.cmd.god.success.off", target.getDisplayName()));
     }
 
     private boolean doGod(EntityPlayerMP playerGod)

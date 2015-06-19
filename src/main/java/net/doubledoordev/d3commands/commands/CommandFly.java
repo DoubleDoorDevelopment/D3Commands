@@ -83,7 +83,7 @@ public class CommandFly extends CommandBase
         boolean on = doFly(target);
 
         if (on) sender.addChatMessage(new ChatComponentTranslation("d3.cmd.fly.success.on", target.getDisplayName()));
-        sender.addChatMessage(new ChatComponentTranslation("d3.cmd.fly.success.off", target.getDisplayName()));
+        else sender.addChatMessage(new ChatComponentTranslation("d3.cmd.fly.success.off", target.getDisplayName()));
     }
 
     private boolean doFly(EntityPlayerMP playerFly)

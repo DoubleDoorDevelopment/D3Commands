@@ -90,7 +90,7 @@ public class CommandBack extends CommandBase
         }
         else
         {
-            sender.addChatMessage(new ChatComponentTranslation("d3.cmd.back.failed"));
+            sender.addChatMessage(new ChatComponentTranslation("d3.cmd.back.failed", target.getDisplayName()));
         }
     }
 }
