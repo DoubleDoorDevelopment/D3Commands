@@ -33,11 +33,14 @@
 package net.doubledoordev.d3commands.commands;
 
 import net.doubledoordev.d3commands.util.Location;
+import net.minecraft.block.material.Material;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.world.World;
 
 import java.util.List;
 
@@ -82,8 +85,17 @@ public class CommandSpawn extends CommandBase
         if (args.length == 0) target = getCommandSenderAsPlayer(sender);
         else target = getPlayer(sender, args[0]);
 
-        Location location = new Location(target.worldObj.getSpawnPoint(), target.dimension);
-        location.teleport(target);
-        sender.addChatMessage(new ChatComponentTranslation("d3.cmd.tp.success", target.getDisplayName()).appendText(" ").appendSibling(location.toClickableChatString()));
+        ChunkCoordinates spawn = target.worldObj.getSpawnPoint();
+        World world = target.getEntityWorld();
+        for (int y = world.getActualHeight(); y > 0; y--)
+        {
+            if (world.getBlock(spawn.posX, y, spawn.posZ).getMaterial() != Material.air)
+            {
+                Location location = new Location(spawn.posX, y + 2, spawn.posZ, world.provider.dimensionId);
+                location.teleport(target);
+                sender.addChatMessage(new ChatComponentTranslation("d3.cmd.tp.success", target.getDisplayName()).appendText(" ").appendSibling(location.toClickableChatString()));
+                return;
+            }
+        }
     }
 }
