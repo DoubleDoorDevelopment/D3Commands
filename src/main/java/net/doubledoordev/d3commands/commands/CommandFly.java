@@ -88,7 +88,7 @@ public class CommandFly extends CommandBase
 
     private boolean doFly(EntityPlayerMP playerFly)
     {
-        playerFly.capabilities.allowFlying = !playerFly.capabilities.isFlying;
+        playerFly.capabilities.allowFlying = !playerFly.capabilities.allowFlying;
         if (!playerFly.capabilities.allowFlying) playerFly.capabilities.isFlying = false;
         playerFly.sendPlayerAbilities();
         return playerFly.capabilities.allowFlying;
