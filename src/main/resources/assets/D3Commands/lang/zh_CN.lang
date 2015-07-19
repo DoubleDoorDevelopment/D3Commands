@@ -12,7 +12,7 @@ d3.cmd.fly.success.on=我坚信 %s 能够飞翔!
 d3.cmd.fly.success.off=%s 不能再飞了哟
 
 d3.cmd.god.success.on=上帝为 %s 打开了一扇窗
-d3.cmd.god.success.off=上帝为 %s 观赏了一扇门
+d3.cmd.god.success.off=上帝为 %s 关上了一扇门
 
 d3.cmd.heal.success=已恢复 %s 的生命值
 
