@@ -20,6 +20,4 @@ d3.cmd.kill.success=Killed %s
 
 d3.cmd.tp.success=Teleported %s to
 
-d3.cmd.key.success=Gave a spectre key to %s
-d3.cmd.key.failed=Spectre key doesn't seem to exists.
-
+d3.cmd.pos.success=%s is at

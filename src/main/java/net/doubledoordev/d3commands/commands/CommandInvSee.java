@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014,
+ * Copyright (c) 2014-2016, Dries007 & DoubleDoorDevelopment
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -12,10 +12,6 @@
  *   this list of conditions and the following disclaimer in the documentation
  *   and/or other materials provided with the distribution.
  *
- *  Neither the name of the {organization} nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,8 +22,6 @@
  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- *
  */
 
 package net.doubledoordev.d3commands.commands;
@@ -103,6 +97,9 @@ public class CommandInvSee extends CommandBase
 
         EntityPlayerMP host = getCommandSenderAsPlayer(sender);
 
+        EntityPlayerMP target = getPlayerOrOffline(sender, args[0]);
+        if (target == null) throw new PlayerNotFoundException();
+
         if (args.length == 2 && args[1].equalsIgnoreCase("enderchest"))
         {
             InventoryEnderChest inv = new InventoryEnderChest()
@@ -131,69 +128,46 @@ public class CommandInvSee extends CommandBase
                     return false;
                 }
             };
-            EntityPlayer player = null;
-            try
-            {
-                player = getPlayer(sender, args[0]);
-            }
-            catch (PlayerNotFoundException e)
-            {
-                try
-                {
-                    File playerDataFolder = new File(MinecraftServer.getServer().worldServers[0].getSaveHandler().getWorldDirectory(), "playerdata");
-                    File playerDataFile = new File(playerDataFolder, args[0] + ".dat");
-                    NBTTagCompound playerData = CompressedStreamTools.readCompressed(new FileInputStream(playerDataFile));
-                    if (playerData != null)
-                    {
-                        UUID uuid = UUID.fromString(args[0]);
-                        GameProfile gameProfile = MinecraftServer.getServer().func_152358_ax().func_152652_a(uuid);
-                        if (gameProfile == null) gameProfile = new GameProfile(uuid, "-??-");
-                        player = new FakePlayer(MinecraftServer.getServer().worldServers[0], gameProfile);
-                    }
-                }
-                catch (IOException ignored)
-                {
 
-                }
-            }
-            if (player == null) throw new PlayerNotFoundException();
-
-            inv.loadInventoryFromNBT(player.getInventoryEnderChest().saveInventoryToNBT());
-            inv.func_110133_a(player.getCommandSenderName() + " Unmodifiable!");
+            inv.loadInventoryFromNBT(target.getInventoryEnderChest().saveInventoryToNBT());
+            inv.func_110133_a(target.getCommandSenderName() + " Unmodifiable!");
             if (inv.getInventoryName().length() > 32) inv.func_110133_a("Unmodifiable!");
             host.displayGUIChest(inv);
         }
         else // non enderchest
         {
-            EntityPlayerMP inv = null;
+            host.displayGUIChest(new FakePlayerInventory(target));
+        }
+    }
 
+    private EntityPlayerMP getPlayerOrOffline(ICommandSender sender, String name)
+    {
+        try
+        {
+            return getPlayer(sender, name);
+        }
+        catch (PlayerNotFoundException e)
+        {
             try
             {
-                inv = getPlayer(sender, args[0]);
+                File playerDataFolder = new File(MinecraftServer.getServer().worldServers[0].getSaveHandler().getWorldDirectory(), "playerdata");
+                File playerDataFile = new File(playerDataFolder, name + ".dat");
+                NBTTagCompound playerData = CompressedStreamTools.readCompressed(new FileInputStream(playerDataFile));
+                if (playerData != null)
+                {
+                    UUID uuid = UUID.fromString(name);
+                    GameProfile gameProfile = MinecraftServer.getServer().func_152358_ax().func_152652_a(uuid);
+                    if (gameProfile == null) gameProfile = new GameProfile(uuid, name);
+                    FakePlayer fakeplayer = new FakePlayer(MinecraftServer.getServer().worldServers[0], gameProfile);
+                    fakeplayer.readEntityFromNBT(playerData);
+                    return fakeplayer;
+                }
             }
-            catch (PlayerNotFoundException e)
+            catch (IOException ignored)
             {
-                try
-                {
-                    File playerDataFolder = new File(MinecraftServer.getServer().worldServers[0].getSaveHandler().getWorldDirectory(), "playerdata");
-                    File playerDataFile = new File(playerDataFolder, args[0] + ".dat");
-                    NBTTagCompound playerData = CompressedStreamTools.readCompressed(new FileInputStream(playerDataFile));
-                    if (playerData != null)
-                    {
-                        UUID uuid = UUID.fromString(args[0]);
-                        GameProfile gameProfile = MinecraftServer.getServer().func_152358_ax().func_152652_a(uuid);
-                        if (gameProfile == null) gameProfile = new GameProfile(uuid, "-??-");
-                        inv = new FakePlayer(MinecraftServer.getServer().worldServers[0], gameProfile);
-                    }
-                }
-                catch (IOException ignored)
-                {
 
-                }
             }
-
-            if (inv == null) throw new PlayerNotFoundException();
-            host.displayGUIChest(new FakePlayerInventory(inv));
         }
+        return null;
     }
 }

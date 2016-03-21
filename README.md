@@ -1,30 +1,25 @@
 D3Commands
 =========
 
-Some useful commands and other server admin tools. (WIP)
+Some useful commands and other server admin tools.
 
 Commands currently included:
-* /getuuid [username] [username 2] [...]
-* /kill [target player]
-* /tps [worldID]
-* /tpx <target player> <destination player> OR /tp <target player> [Dimension ID] [x] [y] [z]
-* /top
-* /heal [target player]
+* /back
+* /explorers
 * /feed [target player]
 * /fly [target player]
-* /god
-* /back
-* /mem
-* /sethome *DOES NOT SAVE OVER SERVER RESTARTS YET!*
-* /home
+* /getuuid [username] [username 2] [...]
 * /gm
+* /god [target player]
+* /heal [target player]
+* /invsee [target player]
+* /kill [target player]
+* /mem
+* /pos [target player]
+* /spawn [target player]
+* /top [target player]
+* /tps [worldID]
+* /tpx <target player> <destination player> OR /tp <target player> [Dimension ID] [x] [y] [z]
 
-Commands to be added soon:
-* /tpa (Use json chat formatting to accept, no command)
-* ...
-
-Other things to do:
-* Add messages to confirm that a command has worked.
-* Find out a good way to handle permissions for commands. Idea: built in system like essentials GroupManager
-* Maybe figure out a way to split up commands even more (Toggle commands - No args commands - Player only, ...)
-* Warps! Each warp saved to a txt file for easy edit/delete plus ingame GUI for lots of fun
+Since v1.2 you can add custom **give item** commands, like we had `/key` for spectre keys.
+Look at the config for an example.

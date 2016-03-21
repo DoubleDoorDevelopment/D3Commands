@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, DoubleDoorDevelopment
+ * Copyright (c) 2014-2016, Dries007 & DoubleDoorDevelopment
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -11,10 +11,6 @@
  *  Redistributions in binary form must reproduce the above copyright notice,
  *   this list of conditions and the following disclaimer in the documentation
  *   and/or other materials provided with the distribution.
- *
- *  Neither the name of the project nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -41,7 +37,6 @@ import net.minecraft.util.*;
  */
 public class Location
 {
-
     private ChunkCoordinates coordinates;
     private int dimension;
 
@@ -95,5 +90,27 @@ public class Location
             MinecraftServer.getServer().getConfigurationManager().transferPlayerToDimension(player, dimension);
         }
         player.setPositionAndUpdate(coordinates.posX, coordinates.posY, coordinates.posZ);
+    }
+
+    public void set(int x, int y, int z)
+    {
+        this.coordinates.posX = x;
+        this.coordinates.posY = y;
+        this.coordinates.posZ = z;
+    }
+
+    public int getX()
+    {
+        return coordinates.posX;
+    }
+
+    public int getY()
+    {
+        return coordinates.posY;
+    }
+
+    public int getZ()
+    {
+        return coordinates.posZ;
     }
 }
