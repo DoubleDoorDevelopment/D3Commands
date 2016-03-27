@@ -53,7 +53,7 @@ public class Location
 
     public Location(Entity entity)
     {
-        this(MathHelper.floor_double(entity.posX), MathHelper.floor_double(entity.posY + 0.5D), MathHelper.floor_double(entity.posZ), entity.dimension);
+        this(MathHelper.floor_double(entity.posX), MathHelper.floor_double(entity.posY), MathHelper.floor_double(entity.posZ), entity.dimension);
     }
 
     public ChunkCoordinates getCoordinates()
@@ -99,6 +99,21 @@ public class Location
         this.coordinates.posZ = z;
     }
 
+    public void setX(int x)
+    {
+        this.coordinates.posX = x;
+    }
+
+    public void setY(int y)
+    {
+        this.coordinates.posY = y;
+    }
+
+    public void setZ(int z)
+    {
+        this.coordinates.posZ = z;
+    }
+
     public int getX()
     {
         return coordinates.posX;
@@ -112,5 +127,20 @@ public class Location
     public int getZ()
     {
         return coordinates.posZ;
+    }
+
+    public int deltaX(int delta)
+    {
+        return (this.coordinates.posX += delta);
+    }
+
+    public int deltaY(int delta)
+    {
+        return (this.coordinates.posY += delta);
+    }
+
+    public int deltaZ(int delta)
+    {
+        return (this.coordinates.posZ += delta);
     }
 }

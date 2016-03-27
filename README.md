@@ -20,6 +20,8 @@ Commands currently included:
 * /top [target player]
 * /tps [worldID]
 * /tpx <target player> <destination player> OR /tp <target player> [Dimension ID] [x] [y] [z]
+* /smite [target player] [radius] [rockets]
+* /fireworks [target player] [radius] [rockets]
 
 Since v1.2 you can add custom **give item** commands, like we had `/key` for spectre keys.
 Look at the config for an example.

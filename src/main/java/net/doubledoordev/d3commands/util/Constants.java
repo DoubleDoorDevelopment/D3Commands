@@ -26,11 +26,14 @@
 
 package net.doubledoordev.d3commands.util;
 
+import java.util.Random;
+
 /**
  * @author Dries007
  */
 public class Constants
 {
+    public static final Random RANDOM = new Random();
     public static final String MODID = "D3Commands";
     public static final String NAME = "D³ Commands";
 }

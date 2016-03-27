@@ -91,6 +91,8 @@ public class D3Commands implements ID3Mod
         commands.add(new CommandEntry(new CommandSpawn(), configuration.getBoolean("spawn", MODID, true, "Teleport to spawn")));
         commands.add(new CommandEntry(new CommandPos(), configuration.getBoolean("pos", MODID, true, "Get other players coordinates.")));
         commands.add(new CommandEntry(new CommandExplorers(), configuration.getBoolean("analiselocations", MODID, true, "Analise locations of online players.")));
+        commands.add(new CommandEntry(new CommandSmite(), configuration.getBoolean("smite", MODID, true, "Power! UNLIMITED POWER.")));
+        commands.add(new CommandEntry(new CommandFireworks(), configuration.getBoolean("fireworks", MODID, true, "Needs more fireworks.")));
 
         configuration.setCategoryLanguageKey(MODID, "d3.cmd.config.cmd");
         configuration.addCustomCategoryComment(MODID, "Set any value to false to disable the command.");
