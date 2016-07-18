@@ -27,8 +27,10 @@
 package net.doubledoordev.d3commands.commands;
 
 import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.text.TextComponentString;
 
 public class CommandMem extends CommandBase
 {
@@ -45,26 +47,17 @@ public class CommandMem extends CommandBase
     }
 
     @Override
-    public void processCommand(ICommandSender sender, String[] args)
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
-        if (args.length == 0)
+        long total = Runtime.getRuntime().totalMemory() / 1024 / 1024;
+        long max = Runtime.getRuntime().maxMemory() / 1024 / 1024;
+        long free = Runtime.getRuntime().freeMemory() / 1024 / 1024;
+
+        sender.addChatMessage(new TextComponentString("Currently assigned Memory: §5" + total + "MB"));
+        if (!(max == total))
         {
-            long total = Runtime.getRuntime().totalMemory() / 1024 / 1024;
-            long max = Runtime.getRuntime().maxMemory() / 1024 / 1024;
-            long free = Runtime.getRuntime().freeMemory() / 1024 / 1024;
-
-            sender.addChatMessage(new ChatComponentTranslation("Currently assigned Memory: §5" + total + "MB"));
-            if (!(max == total))
-            {
-                sender.addChatMessage(new ChatComponentTranslation("Max assignable Memory: §5" + max + "MB"));
-            }
-            sender.addChatMessage(new ChatComponentTranslation("Free assigned memory: §5" + free + "MB"));
+            sender.addChatMessage(new TextComponentString("Max assignable Memory: §5" + max + "MB"));
         }
-    }
-
-    @Override
-    public boolean canCommandSenderUseCommand(final ICommandSender sender)
-    {
-        return true;
+        sender.addChatMessage(new TextComponentString("Free assigned memory: §5" + free + "MB"));
     }
 }

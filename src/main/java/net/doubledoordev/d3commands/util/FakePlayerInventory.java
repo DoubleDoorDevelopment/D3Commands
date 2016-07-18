@@ -30,18 +30,22 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
+
+import javax.annotation.Nullable;
 
 /**
  * @author Dries007
  */
 public class FakePlayerInventory implements IInventory
 {
-    String name;
-    final ItemStack[] stacks;
+    private String name;
+    private final ItemStack[] stacks;
 
     public FakePlayerInventory(EntityPlayerMP inv)
     {
-        name = inv.getCommandSenderName() + " Unmodifiable!";
+        name = inv.getDisplayNameString() + " Unmodifiable!";
         if (name.length() > 32) name = "Unmodifiable!";
         stacks = inv.inventory.mainInventory;
     }
@@ -59,19 +63,14 @@ public class FakePlayerInventory implements IInventory
     }
 
     @Override
-    public String getInventoryName()
-    {
-        return name;
-    }
-
-    @Override
     public ItemStack decrStackSize(int p_70298_1_, int p_70298_2_)
     {
         return null;
     }
 
+    @Nullable
     @Override
-    public ItemStack getStackInSlotOnClosing(int p_70304_1_)
+    public ItemStack removeStackFromSlot(int index)
     {
         return null;
     }
@@ -80,12 +79,6 @@ public class FakePlayerInventory implements IInventory
     public void setInventorySlotContents(int p_70299_1_, ItemStack p_70299_2_)
     {
 
-    }
-
-    @Override
-    public boolean hasCustomInventoryName()
-    {
-        return true;
     }
 
     @Override
@@ -107,13 +100,13 @@ public class FakePlayerInventory implements IInventory
     }
 
     @Override
-    public void openInventory()
+    public void openInventory(EntityPlayer player)
     {
 
     }
 
     @Override
-    public void closeInventory()
+    public void closeInventory(EntityPlayer player)
     {
 
     }
@@ -122,5 +115,47 @@ public class FakePlayerInventory implements IInventory
     public boolean isItemValidForSlot(int p_94041_1_, ItemStack p_94041_2_)
     {
         return false;
+    }
+
+    @Override
+    public int getField(int id)
+    {
+        return 0;
+    }
+
+    @Override
+    public void setField(int id, int value)
+    {
+
+    }
+
+    @Override
+    public int getFieldCount()
+    {
+        return 0;
+    }
+
+    @Override
+    public void clear()
+    {
+
+    }
+
+    @Override
+    public String getName()
+    {
+        return name;
+    }
+
+    @Override
+    public boolean hasCustomName()
+    {
+        return true;
+    }
+
+    @Override
+    public ITextComponent getDisplayName()
+    {
+        return new TextComponentString(name);
     }
 }

@@ -28,13 +28,16 @@ package net.doubledoordev.d3commands.commands;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.ServerConfigurationManager;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -55,25 +58,24 @@ public class CommandGetUUID extends CommandBase
     }
 
     @Override
-    public void processCommand(ICommandSender sender, String[] args)
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
-        ServerConfigurationManager scm = MinecraftServer.getServer().getConfigurationManager();
         if (args.length == 0)
         {
-            sender.addChatMessage(new ChatComponentText(EnumChatFormatting.GOLD + "All online players:"));
-            for (GameProfile gp : scm.func_152600_g())
+            sender.addChatMessage(new TextComponentString("All online players:").setStyle(new Style().setColor(TextFormatting.GOLD)));
+            for (GameProfile gp : server.getPlayerList().getAllProfiles())
             {
-                sender.addChatMessage(new ChatComponentText(gp.getName() + " -> " + gp.getId()));
+                sender.addChatMessage(new TextComponentString(gp.getName() + " -> " + gp.getId()));
             }
         }
         else
         {
-            sender.addChatMessage(new ChatComponentText(EnumChatFormatting.GOLD + "All listed players:"));
+            sender.addChatMessage(new TextComponentString("All listed players:").setStyle(new Style().setColor(TextFormatting.GOLD)));
             for (String name : args)
             {
-                EntityPlayerMP player = scm.func_152612_a(name);
-                if (player == null) sender.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "No player with name " + name));
-                else sender.addChatMessage(new ChatComponentText(player.getCommandSenderName() + " -> " + player.getUniqueID()));
+                EntityPlayerMP player = server.getPlayerList().getPlayerByUsername(name);
+                if (player == null) sender.addChatMessage(new TextComponentString("No player with name " + name).setStyle(new Style().setColor(TextFormatting.RED)));
+                else sender.addChatMessage(new TextComponentString(player.getDisplayNameString() + " -> " + player.getUniqueID()));
             }
         }
     }
@@ -85,8 +87,8 @@ public class CommandGetUUID extends CommandBase
     }
 
     @Override
-    public List addTabCompletionOptions(ICommandSender sender, String[] args)
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
-        return getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
+        return getListOfStringsMatchingLastWord(args, server.getAllUsernames());
     }
 }

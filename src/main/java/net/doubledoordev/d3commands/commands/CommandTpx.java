@@ -26,19 +26,24 @@
 
 package net.doubledoordev.d3commands.commands;
 
-import net.doubledoordev.d3commands.util.Location;
+import net.doubledoordev.d3commands.util.BlockPosDim;
 import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.command.NumberInvalidException;
 import net.minecraft.command.WrongUsageException;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.ChunkCoordinates;
-import net.minecraft.world.World;
-import net.minecraftforge.common.DimensionManager;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 
+import javax.annotation.Nullable;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 public class CommandTpx extends CommandBase
 {
@@ -51,7 +56,98 @@ public class CommandTpx extends CommandBase
     @Override
     public String getCommandUsage(ICommandSender icommandsender)
     {
-        return "/tpx <target player> <destination player> OR /tp <target player> [Dimension ID] [x] [y] [z]";
+        return "/tpx <target> <destination> OR /tp <target> [Dimension ID] [x] [y] [z]";
+    }
+
+    @Override
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    {
+        if (args.length < 1)
+        {
+            throw new WrongUsageException(getCommandUsage(sender));
+        }
+        else
+        {
+            int i = 0;
+            Entity target;
+
+            if (args.length != 2 && args.length != 5 && args.length != 7)
+            {
+                target = getCommandSenderAsPlayer(sender);
+            }
+            else
+            {
+                target = getEntity(server, sender, args[0]);
+                i = 1;
+            }
+
+            if (args.length != 1 && args.length != 2)
+            {
+                if (args.length < i + 3)
+                {
+                    throw new WrongUsageException(getCommandUsage(sender));
+                }
+                else if (target.worldObj != null)
+                {
+                    int j = i;
+                    int dim = parseInt(args[j++]);
+                    CommandBase.CoordinateArg x = parseCoordinate(target.posX, args[j++], true);
+                    CommandBase.CoordinateArg y = parseCoordinate(target.posY, args[j++], -512, 512, false);
+                    CommandBase.CoordinateArg z = parseCoordinate(target.posZ, args[j++], true);
+                    CommandBase.CoordinateArg yaw = parseCoordinate((double)target.rotationYaw, args.length > j ? args[j++] : "~", false);
+                    CommandBase.CoordinateArg pitch = parseCoordinate((double)target.rotationPitch, args.length > j ? args[j] : "~", false);
+
+                    BlockPosDim dest;
+                    if (target.dimension != dim) target.changeDimension(dim);
+
+                    if (target instanceof EntityPlayerMP)
+                    {
+                        Set<SPacketPlayerPosLook.EnumFlags> set = EnumSet.noneOf(SPacketPlayerPosLook.EnumFlags.class);
+                        if (x.isRelative()) set.add(SPacketPlayerPosLook.EnumFlags.X);
+                        if (y.isRelative()) set.add(SPacketPlayerPosLook.EnumFlags.Y);
+                        if (z.isRelative()) set.add(SPacketPlayerPosLook.EnumFlags.Z);
+                        if (pitch.isRelative()) set.add(SPacketPlayerPosLook.EnumFlags.X_ROT);
+                        if (yaw.isRelative()) set.add(SPacketPlayerPosLook.EnumFlags.Y_ROT);
+                        float f = (float)yaw.getAmount();
+                        if (!yaw.isRelative()) f = MathHelper.wrapDegrees(f);
+                        float f1 = (float)pitch.getAmount();
+                        if (!pitch.isRelative()) f1 = MathHelper.wrapDegrees(f1);
+                        target.dismountRidingEntity();
+                        ((EntityPlayerMP)target).connection.setPlayerLocation(x.getAmount(), y.getAmount(), z.getAmount(), f, f1, set);
+                        target.setRotationYawHead(f);
+                        dest = new BlockPosDim(x.getAmount(), y.getAmount(), z.getAmount(), dim);
+                    }
+                    else
+                    {
+                        float f2 = (float)MathHelper.wrapDegrees(yaw.getResult());
+                        float f3 = (float)MathHelper.wrapDegrees(pitch.getResult());
+                        f3 = MathHelper.clamp_float(f3, -90.0F, 90.0F);
+                        target.setLocationAndAngles(x.getResult(), y.getResult(), z.getResult(), f2, f3);
+                        target.setRotationYawHead(f2);
+                        dest = new BlockPosDim(x.getResult(), y.getResult(), z.getResult(), dim);
+                    }
+                    sender.addChatMessage(new TextComponentTranslation("d3.cmd.tp.success", target.getDisplayName()).appendText(" ").appendSibling(dest.toClickableChatString()));
+                }
+            }
+            else
+            {
+                Entity dest = getEntity(server, sender, args[args.length - 1]);
+
+                if (target.dimension != dest.dimension) target.changeDimension(dest.dimension);
+                target.dismountRidingEntity();
+
+                if (target instanceof EntityPlayerMP)
+                {
+                    ((EntityPlayerMP)target).connection.setPlayerLocation(dest.posX, dest.posY, dest.posZ, dest.rotationYaw, dest.rotationPitch);
+                    sender.addChatMessage(new TextComponentTranslation("d3.cmd.tp.success", target.getDisplayName()).appendText(" ").appendSibling(new TextComponentString(((EntityPlayerMP) dest).getDisplayNameString())));
+                }
+                else
+                {
+                    target.setLocationAndAngles(dest.posX, dest.posY, dest.posZ, dest.rotationYaw, dest.rotationPitch);
+                    sender.addChatMessage(new TextComponentTranslation("d3.cmd.tp.success", target.getDisplayName()).appendText(" ").appendSibling(new TextComponentString(dest.getName())));
+                }
+            }
+        }
     }
 
     @Override
@@ -66,91 +162,10 @@ public class CommandTpx extends CommandBase
         return userIndex == 0 || userIndex == 1;
     }
 
-    public static boolean isNumeric(final String str)
-    {
-        try
-        {// Try to parse the string as a double
-            final double d = Double.parseDouble(str);
-        }
-        catch (final NumberFormatException nfe)
-        {// if an exception is created the it is not a number
-            return false;
-        }
-        // if we get here an exception was not raised thus it is a number, and we can return true
-        return true;
-    }
-
     @Override
-    public void processCommand(ICommandSender sender, String[] args)
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
-        Location targetLocation = null;
-        EntityPlayerMP targetPlayer = null;
-
-        if (args.length == 1) // [dim] OR [Location target]
-        {
-            if (isNumeric(args[0])) // tp to dimension
-            {
-                final World dimension = DimensionManager.getWorld(Integer.parseInt(args[0]));
-                if (dimension != null)
-                {
-                    targetPlayer = getCommandSenderAsPlayer(sender);
-                    targetLocation = new Location(dimension.getSpawnPoint(), dimension.provider.dimensionId);
-                }
-            }
-            else // tp to player
-            {
-                targetPlayer = getCommandSenderAsPlayer(sender);
-                targetLocation = new Location(getPlayer(sender, args[0]));
-            }
-        }
-        else if (args.length == 2) // [TP target] [dim] OR [TP target] [Location target]
-        {
-            if (isNumeric(args[1]))
-            {
-                final World dimension = DimensionManager.getWorld(Integer.parseInt(args[1]));
-                if (dimension != null)
-                {
-                    targetLocation = new Location(dimension.getSpawnPoint(), dimension.provider.dimensionId);
-                    targetPlayer = getPlayer(sender, args[0]);
-                }
-            }
-            else
-            {
-                targetLocation = new Location(getPlayer(sender, args[1]));
-                targetPlayer = getPlayer(sender, args[0]);
-            }
-        }
-        else if (args.length == 4) // [dim] [x] [y] [z]
-        {
-            int dim = parseInt(sender, args[0]);
-            int x = parseIntBounded(sender, args[1], -30000000, 30000000);
-            int y = parseIntWithMin(sender, args[2], -10);
-            int z = parseIntBounded(sender, args[3], -30000000, 30000000);
-
-            targetLocation = new Location(x, y, z, dim);
-            targetPlayer = getCommandSenderAsPlayer(sender);
-        }
-        else if (args.length == 5) // [TP target] [dim] [x] [y] [z]
-        {
-            int dim = parseInt(sender, args[1]);
-            int x = parseIntBounded(sender, args[2], -30000000, 30000000);
-            int y = parseIntWithMin(sender, args[3], -10);
-            int z = parseIntBounded(sender, args[4], -30000000, 30000000);
-
-            targetLocation = new Location(x, y, z, dim);
-            targetPlayer = getPlayer(sender, args[0]);
-        }
-
-        if (targetLocation == null || targetPlayer == null) throw new WrongUsageException(getCommandUsage(sender));
-
-        targetLocation.teleport(targetPlayer);
-        sender.addChatMessage(new ChatComponentTranslation("d3.cmd.tp.success", targetPlayer.getDisplayName()).appendText(" ").appendSibling(targetLocation.toClickableChatString()));
-    }
-
-    @Override
-    public List addTabCompletionOptions(final ICommandSender sender, final String[] args)
-    {
-        if (args.length > 2) return null;
-        return getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
+        if (args.length == 1) return getListOfStringsMatchingLastWord(args, server.getAllUsernames());
+        return super.getTabCompletionOptions(server, sender, args, pos);
     }
 }

@@ -26,6 +26,8 @@
 
 package net.doubledoordev.d3commands.util;
 
+import net.doubledoordev.d3core.util.CoreConstants;
+
 import java.util.Random;
 
 /**
@@ -36,4 +38,10 @@ public class Constants
     public static final Random RANDOM = new Random();
     public static final String MODID = "D3Commands";
     public static final String NAME = "D³ Commands";
+    public static final String UPDATE_URL = CoreConstants.BASE_URL + MODID + ".json";
+    /**
+     * @see net.doubledoordev.d3commands.client.ModConfigGuiFactory
+     */
+    public static final String MOD_GUI_FACTORY = "net.doubledoordev.d3commands.client.ModConfigGuiFactory";
+
 }

@@ -22,65 +22,62 @@
  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
  */
 
-package net.doubledoordev.d3commands;
+package net.doubledoordev.d3commands.util;
 
-import net.minecraft.command.CommandBase;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.event.ClickEvent;
 
-/**
- * Created by Wout on 25/10/2014.
- */
-public class CommandEntry
+import javax.annotation.concurrent.Immutable;
+
+@Immutable
+public class BlockPosDim extends BlockPos
 {
-    private CommandBase command;
-    private boolean enabled;
-    private String permission;
+    private final int dim;
 
-    public CommandEntry(CommandBase command, boolean enabled, String permission)
+    public BlockPosDim(int x, int y, int z, int dim)
     {
-        this.command = command;
-        this.enabled = enabled;
-        this.permission = permission;
+        super(x, y, z);
+        this.dim = dim;
     }
 
-    public CommandEntry(CommandBase command, boolean enabled)
+    public BlockPosDim(double x, double y, double z, int dim)
     {
-        this.command = command;
-        this.enabled = enabled;
+        super(x, y, z);
+        this.dim = dim;
     }
 
-    public CommandBase getCommand()
+    public BlockPosDim(Entity source)
     {
-        return command;
+        super(source);
+        this.dim = source.dimension;
     }
 
-    public void setCommand(CommandBase command)
+    public BlockPosDim(Vec3d vec, int dim)
     {
-        this.command = command;
+        super(vec);
+        this.dim = dim;
     }
 
-    public boolean isEnabled()
+    public BlockPosDim(Vec3i source, int dim)
     {
-        return enabled;
+        super(source);
+        this.dim = dim;
     }
 
-    public void setEnabled(boolean enabled)
+    public ITextComponent toClickableChatString()
     {
-        this.enabled = enabled;
+        return new TextComponentString("[" + getX() + "X " + getY() + "Y " + getZ() + "Z]").setStyle(new Style().setClickEvent(
+                new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpx " + dim + " " + getX() + " " + getY() + " " + getZ())));
     }
 
-    public String getPermission()
-    {
-        if (permission == null)
-        {
-            return "d3.commands." + this.getCommand().getCommandName().toLowerCase();
-        }
-        return permission;
-    }
 
-    public void setPermission(String permission)
-    {
-        this.permission = permission;
-    }
 }

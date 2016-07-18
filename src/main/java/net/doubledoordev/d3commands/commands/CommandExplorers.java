@@ -26,18 +26,19 @@
 
 package net.doubledoordev.d3commands.commands;
 
-import net.doubledoordev.d3commands.util.Location;
+import net.doubledoordev.d3commands.util.BlockPosDim;
 import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatStyle;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
 
-import java.util.List;
 import java.util.TreeSet;
 
 public class CommandExplorers extends CommandBase
@@ -55,56 +56,44 @@ public class CommandExplorers extends CommandBase
     }
 
     @Override
-    public boolean isUsernameIndex(final String[] args, final int userIndex)
-    {
-        return false;
-    }
-
-    @Override
-    public List addTabCompletionOptions(final ICommandSender sender, final String[] args)
-    {
-        return null;
-    }
-
-    @Override
-    public void processCommand(ICommandSender sender, String[] args)
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
         int n = 10;
-        if (args.length > 0) n = parseIntWithMin(sender, args[0], 1);
+        if (args.length > 0) n = parseInt(args[0], 1);
         int dim = 0;
-        if (args.length > 1) dim = parseInt(sender, args[1]);
+        if (args.length > 1) dim = parseInt(args[1]);
         WorldServer worldServer = DimensionManager.getWorld(dim);
         if (worldServer == null) throw new WrongUsageException("Dim " + dim + " doesn't exist.");
-        Location location = new Location(worldServer.getSpawnPoint(), dim);
-        if (args.length == 5) location.set(parseInt(sender, args[2]), parseInt(sender, args[3]), parseInt(sender, args[4]));
+        BlockPosDim location = args.length == 5 ?
+                new BlockPosDim(parseInt(args[2]), parseInt(args[3]), parseInt(args[4]), dim) :
+                new BlockPosDim(worldServer.getSpawnPoint(), dim);
 
-        TreeSet<Pair> players = new TreeSet<>();
-        //noinspection unchecked
-        for (EntityPlayer player : (List<EntityPlayer>)worldServer.playerEntities)
+        TreeSet<Data> players = new TreeSet<>();
+        for (EntityPlayer player : worldServer.playerEntities)
         {
             int x = location.getX() - (int) player.posX;
             int z = location.getZ() - (int) player.posZ;
 
             int i = (int) Math.sqrt(x*x + z*z);
-            players.add(new Pair(player, i));
+            players.add(new Data(player, i));
         }
 
-        sender.addChatMessage(new ChatComponentText("Center: ").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.AQUA)).appendSibling(location.toClickableChatString()));
+        sender.addChatMessage(new TextComponentString("Center: ").setStyle(new Style().setColor(TextFormatting.AQUA)).appendSibling(location.toClickableChatString()));
 
         int i = 0;
-        for (Pair pair : players.descendingSet())
+        for (Data data : players.descendingSet())
         {
             if (++i > n) break;
-            sender.addChatMessage(new ChatComponentText(pair.player.getDisplayName() + " is " + pair.distance + "m away."));
+            sender.addChatMessage(new TextComponentString(data.player.getDisplayNameString() + " is " + data.distance + "m away. ").appendSibling(new BlockPosDim(data.player).toClickableChatString()));
         }
     }
 
-    public static final class Pair implements Comparable
+    public static final class Data implements Comparable
     {
         public final EntityPlayer player;
         public final int distance;
 
-        public Pair(EntityPlayer player, int distance)
+        public Data(EntityPlayer player, int distance)
         {
             this.player = player;
             this.distance = distance;
@@ -113,7 +102,7 @@ public class CommandExplorers extends CommandBase
         @Override
         public int compareTo(Object o)
         {
-            if (o instanceof Pair) return distance - ((Pair) o).distance;
+            if (o instanceof Data) return distance - ((Data) o).distance;
             return 0;
         }
     }

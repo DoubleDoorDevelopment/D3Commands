@@ -28,20 +28,18 @@ package net.doubledoordev.d3commands.commands;
 
 import com.mojang.authlib.GameProfile;
 import net.doubledoordev.d3commands.util.FakePlayerInventory;
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.PlayerNotFoundException;
-import net.minecraft.command.WrongUsageException;
+import net.minecraft.command.*;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.IInvBasic;
 import net.minecraft.inventory.InventoryEnderChest;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.util.FakePlayer;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -65,39 +63,13 @@ public class CommandInvSee extends CommandBase
     }
 
     @Override
-    public int getRequiredPermissionLevel()
-    {
-        return 2;
-    }
-
-    @Override
-    public boolean isUsernameIndex(final String[] args, final int userIndex)
-    {
-        return userIndex == 0;
-    }
-
-    @Override
-    public List addTabCompletionOptions(final ICommandSender sender, final String[] args)
-    {
-        if (args.length == 1)
-        {
-            Set<String> names = new HashSet<>();
-            for (String name : MinecraftServer.getServer().getAllUsernames()) names.add(name);
-            for (String name : MinecraftServer.getServer().getConfigurationManager().getAvailablePlayerDat()) names.add(name);
-            return getListOfStringsFromIterableMatchingLastWord(args, names);
-        }
-        else if (args.length == 2) return getListOfStringsMatchingLastWord(args, "enderchest");
-        return null;
-    }
-
-    @Override
-    public void processCommand(final ICommandSender sender, final String[] args)
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
         if (args.length < 1) throw new WrongUsageException(getCommandUsage(sender));
 
         EntityPlayerMP host = getCommandSenderAsPlayer(sender);
 
-        EntityPlayerMP target = getPlayerOrOffline(sender, args[0]);
+        EntityPlayerMP target = getPlayerOrOffline(server, sender, args[0]);
         if (target == null) throw new PlayerNotFoundException();
 
         if (args.length == 2 && args[1].equalsIgnoreCase("enderchest"))
@@ -105,16 +77,10 @@ public class CommandInvSee extends CommandBase
             InventoryEnderChest inv = new InventoryEnderChest()
             {
                 @Override
-                public void func_110134_a(IInvBasic p_110134_1_)
-                {
-
-                }
+                public void closeInventory(EntityPlayer player) {}
 
                 @Override
-                public void func_110132_b(IInvBasic p_110132_1_)
-                {
-
-                }
+                public void openInventory(EntityPlayer player) {}
 
                 @Override
                 public ItemStack decrStackSize(int p_70298_1_, int p_70298_2_)
@@ -130,8 +96,9 @@ public class CommandInvSee extends CommandBase
             };
 
             inv.loadInventoryFromNBT(target.getInventoryEnderChest().saveInventoryToNBT());
-            inv.func_110133_a(target.getCommandSenderName() + " Unmodifiable!");
-            if (inv.getInventoryName().length() > 32) inv.func_110133_a("Unmodifiable!");
+            String name = target.getDisplayNameString() + " Unmodifiable!";
+            if (name.length() > 32) name = "Unmodifiable!";
+            inv.setCustomName(name);
             host.displayGUIChest(inv);
         }
         else // non enderchest
@@ -140,28 +107,51 @@ public class CommandInvSee extends CommandBase
         }
     }
 
-    private EntityPlayerMP getPlayerOrOffline(ICommandSender sender, String name)
+    @Override
+    public int getRequiredPermissionLevel()
+    {
+        return 2;
+    }
+
+    @Override
+    public boolean isUsernameIndex(final String[] args, final int userIndex)
+    {
+        return userIndex == 0;
+    }
+
+    @Override
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
+    {
+        if (args.length == 1)
+        {
+            Set<String> names = new HashSet<>();
+            for (String name : server.getAllUsernames()) names.add(name);
+            for (String name : server.getPlayerList().getAvailablePlayerDat()) names.add(name);
+            return getListOfStringsMatchingLastWord(args, names);
+        }
+        else if (args.length == 2) return getListOfStringsMatchingLastWord(args, "enderchest");
+        return super.getTabCompletionOptions(server, sender, args, pos);
+    }
+
+    private EntityPlayerMP getPlayerOrOffline(MinecraftServer server, ICommandSender sender, String name)
     {
         try
         {
-            return getPlayer(sender, name);
+            return getPlayer(server, sender, name);
         }
         catch (PlayerNotFoundException e)
         {
             try
             {
-                File playerDataFolder = new File(MinecraftServer.getServer().worldServers[0].getSaveHandler().getWorldDirectory(), "playerdata");
+                File playerDataFolder = new File(server.worldServers[0].getSaveHandler().getWorldDirectory(), "playerdata");
                 File playerDataFile = new File(playerDataFolder, name + ".dat");
                 NBTTagCompound playerData = CompressedStreamTools.readCompressed(new FileInputStream(playerDataFile));
-                if (playerData != null)
-                {
-                    UUID uuid = UUID.fromString(name);
-                    GameProfile gameProfile = MinecraftServer.getServer().func_152358_ax().func_152652_a(uuid);
-                    if (gameProfile == null) gameProfile = new GameProfile(uuid, name);
-                    FakePlayer fakeplayer = new FakePlayer(MinecraftServer.getServer().worldServers[0], gameProfile);
-                    fakeplayer.readEntityFromNBT(playerData);
-                    return fakeplayer;
-                }
+                UUID uuid = UUID.fromString(name);
+                GameProfile gameProfile = server.getPlayerProfileCache().getProfileByUUID(uuid);
+                if (gameProfile == null) gameProfile = new GameProfile(uuid, name);
+                FakePlayer fakeplayer = new FakePlayer(server.worldServers[0], gameProfile);
+                fakeplayer.readEntityFromNBT(playerData);
+                return fakeplayer;
             }
             catch (IOException ignored)
             {

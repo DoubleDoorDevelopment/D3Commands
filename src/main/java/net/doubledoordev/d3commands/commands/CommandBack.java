@@ -26,15 +26,17 @@
 
 package net.doubledoordev.d3commands.commands;
 
-import net.doubledoordev.d3commands.D3Commands;
-import net.doubledoordev.d3commands.util.Location;
+import net.doubledoordev.d3commands.event.PlayerDeathEventHandler;
+import net.doubledoordev.d3commands.util.BlockPosDim;
 import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentTranslation;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class CommandBack extends CommandBase
@@ -52,6 +54,28 @@ public class CommandBack extends CommandBase
     }
 
     @Override
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    {
+        EntityPlayerMP target;
+
+        if (args.length == 0) target = getCommandSenderAsPlayer(sender);
+        else target = getPlayer(server, sender, args[0]);
+
+        BlockPosDim blockPosDim = PlayerDeathEventHandler.get(target.getUniqueID());
+
+        if (blockPosDim == null)
+        {
+            sender.addChatMessage(new TextComponentTranslation("d3.cmd.back.failed", target.getDisplayName()));
+        }
+        else
+        {
+            target.dismountRidingEntity();
+            target.connection.setPlayerLocation(blockPosDim.getX(), blockPosDim.getY(), blockPosDim.getZ(), target.rotationYaw, target.rotationPitch);
+            sender.addChatMessage(new TextComponentTranslation("d3.cmd.back.success", target.getDisplayName()).appendText(" ").appendSibling(blockPosDim.toClickableChatString()));
+        }
+    }
+
+    @Override
     public int getRequiredPermissionLevel()
     {
         return 2;
@@ -64,29 +88,9 @@ public class CommandBack extends CommandBase
     }
 
     @Override
-    public List addTabCompletionOptions(final ICommandSender sender, final String[] args)
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
-        if (args.length == 1) return getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
-        return null;
-    }
-
-    @Override
-    public void processCommand(ICommandSender sender, String[] args)
-    {
-        EntityPlayerMP target;
-
-        if (args.length == 0) target = getCommandSenderAsPlayer(sender);
-        else target = getPlayer(sender, args[0]);
-
-        if (D3Commands.instance.deathlog.containsKey(target.getPersistentID()))
-        {
-            Location locto = D3Commands.instance.deathlog.get(target.getPersistentID());
-            locto.teleport(target);
-            sender.addChatMessage(new ChatComponentTranslation("d3.cmd.back.success", target.getDisplayName()).appendText(" ").appendSibling(locto.toClickableChatString()));
-        }
-        else
-        {
-            sender.addChatMessage(new ChatComponentTranslation("d3.cmd.back.failed", target.getDisplayName()));
-        }
+        if (args.length == 1) return getListOfStringsMatchingLastWord(args, server.getAllUsernames());
+        return super.getTabCompletionOptions(server, sender, args, pos);
     }
 }

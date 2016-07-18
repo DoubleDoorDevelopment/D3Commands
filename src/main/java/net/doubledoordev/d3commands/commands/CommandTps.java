@@ -30,9 +30,12 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.DimensionManager;
 
+import javax.annotation.Nullable;
 import java.text.DecimalFormat;
 import java.util.List;
 
@@ -53,49 +56,38 @@ public class CommandTps extends CommandBase
     }
 
     @Override
-    public void processCommand(ICommandSender sender, String[] args)
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
         if (args.length == 0)
         {
             for (Integer dimId : DimensionManager.getIDs())
             {
-                double worldTickTime = mean(MinecraftServer.getServer().worldTickTimes.get(dimId)) * 1.0E-6D;
+                double worldTickTime = MathHelper.average(server.worldTickTimes.get(dimId)) * 1.0E-6D;
                 double worldTPS = Math.min(1000.0 / worldTickTime, 20);
-                sender.addChatMessage(new ChatComponentTranslation("commands.forge.tps.summary", String.format("Dim %d", dimId), timeFormatter.format(worldTickTime), timeFormatter.format(worldTPS)));
+                sender.addChatMessage(new TextComponentTranslation("commands.forge.tps.summary", String.format("Dim %d", dimId), timeFormatter.format(worldTickTime), timeFormatter.format(worldTPS)));
             }
-            double meanTickTime = mean(MinecraftServer.getServer().tickTimeArray) * 1.0E-6D;
+            double meanTickTime = MathHelper.average(server.tickTimeArray) * 1.0E-6D;
             double meanTPS = Math.min(1000.0 / meanTickTime, 20);
-            sender.addChatMessage(new ChatComponentTranslation("commands.forge.tps.summary", "Overall", timeFormatter.format(meanTickTime), timeFormatter.format(meanTPS)));
+            sender.addChatMessage(new TextComponentTranslation("commands.forge.tps.summary", "Overall", timeFormatter.format(meanTickTime), timeFormatter.format(meanTPS)));
         }
         else
         {
-            int dim = parseInt(sender, args[0]);
+            int dim = parseInt(args[0]);
             if (DimensionManager.getWorld(dim) == null) throw new CommandException("d3.cmd.cmd.tps.dimInvalid", dim);
-            double worldTickTime = mean(MinecraftServer.getServer().worldTickTimes.get(dim)) * 1.0E-6D;
+            double worldTickTime = MathHelper.average(server.worldTickTimes.get(dim)) * 1.0E-6D;
             double worldTPS = Math.min(1000.0 / worldTickTime, 20);
-            sender.addChatMessage(new ChatComponentTranslation("commands.forge.tps.summary", String.format("Dim %d", dim), timeFormatter.format(worldTickTime), timeFormatter.format(worldTPS)));
+            sender.addChatMessage(new TextComponentTranslation("commands.forge.tps.summary", String.format("Dim %d", dim), timeFormatter.format(worldTickTime), timeFormatter.format(worldTPS)));
         }
     }
 
     @Override
-    public boolean canCommandSenderUseCommand(final ICommandSender sender)
+    public int getRequiredPermissionLevel()
     {
-        return true;
-    }
-
-    private static long mean(long[] values)
-    {
-        long sum = 0l;
-        for (long v : values)
-        {
-            sum += v;
-        }
-
-        return sum / values.length;
+        return 0;
     }
 
     @Override
-    public List addTabCompletionOptions(final ICommandSender sender, final String[] args)
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
         if (args.length == 1)
         {
@@ -104,6 +96,6 @@ public class CommandTps extends CommandBase
                 strings[i] = DimensionManager.getIDs()[i].toString();
             return getListOfStringsMatchingLastWord(args, strings);
         }
-        return null;
+        return super.getTabCompletionOptions(server, sender, args, pos);
     }
 }

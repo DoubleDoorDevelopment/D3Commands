@@ -28,11 +28,14 @@ package net.doubledoordev.d3commands.commands;
 
 import net.doubledoordev.d3commands.util.Constants;
 import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.effect.EntityLightningBolt;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.BlockPos;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class CommandSmite extends CommandBase
@@ -46,7 +49,43 @@ public class CommandSmite extends CommandBase
     @Override
     public String getCommandUsage(ICommandSender icommandsender)
     {
-        return "/smite [player] [radius] [strikes]";
+        return "/smite [target] [radius] [strikes]";
+    }
+
+    @Override
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
+    {
+        if (args.length == 1) return getListOfStringsMatchingLastWord(args, server.getAllUsernames());
+        return super.getTabCompletionOptions(server, sender, args, pos);
+    }
+
+    @Override
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    {
+        int rad = 1;
+        int strikes = 1;
+        boolean effectOnly = false;
+
+        if (args.length > 1) rad = parseInt(args[1], 1);
+        if (args.length > 2) strikes = parseInt(args[2], 1);
+        if (args.length > 3) effectOnly = parseBoolean(args[3]);
+
+        if (args.length == 0) smite(getCommandSenderAsPlayer(sender), rad, strikes, effectOnly);
+        else
+        {
+            for (Entity entity : getEntityList(server, sender, args[0]))
+            {
+                smite(entity, rad, strikes, effectOnly);
+            }
+        }
+    }
+
+    private void smite(Entity target, int rad, int strikes, boolean effectOnly)
+    {
+        while (strikes -- > 0)
+        {
+            target.worldObj.addWeatherEffect(new EntityLightningBolt(target.worldObj, target.posX + Constants.RANDOM.nextInt(rad) - rad / 2.0, target.posY, target.posZ + Constants.RANDOM.nextInt(rad) - rad / 2.0, effectOnly));
+        }
     }
 
     @Override
@@ -59,35 +98,5 @@ public class CommandSmite extends CommandBase
     public boolean isUsernameIndex(final String[] args, final int userIndex)
     {
         return userIndex == 0;
-    }
-
-    @Override
-    public List addTabCompletionOptions(final ICommandSender sender, final String[] args)
-    {
-        if (args.length == 1) return getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
-        return null;
-    }
-
-    @Override
-    public void processCommand(ICommandSender sender, String[] args)
-    {
-        EntityPlayerMP target;
-
-        if (args.length == 0) target = getCommandSenderAsPlayer(sender);
-        else target = getPlayer(sender, args[0]);
-
-        double x = target.posX;
-        double z = target.posZ;
-
-        int rad = 1;
-        if (args.length > 1) rad = parseIntWithMin(sender, args[1], 1);
-
-        int stikes = 1;
-        if (args.length > 2) stikes = parseIntWithMin(sender, args[2], 1);
-
-        while (stikes -- > 0)
-        {
-            target.worldObj.addWeatherEffect(new EntityLightningBolt(target.worldObj, x + Constants.RANDOM.nextInt(rad) - rad / 2.0, target.posY, z + Constants.RANDOM.nextInt(rad) - rad / 2.0));
-        }
     }
 }

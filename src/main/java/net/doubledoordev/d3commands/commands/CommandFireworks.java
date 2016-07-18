@@ -28,6 +28,7 @@ package net.doubledoordev.d3commands.commands;
 
 import net.doubledoordev.d3commands.util.Constants;
 import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.item.EntityFireworkRocket;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -36,7 +37,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.BlockPos;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class CommandFireworks extends CommandBase
@@ -54,44 +57,25 @@ public class CommandFireworks extends CommandBase
     }
 
     @Override
-    public int getRequiredPermissionLevel()
-    {
-        return 2;
-    }
-
-    @Override
-    public boolean isUsernameIndex(final String[] args, final int userIndex)
-    {
-        return userIndex == 0;
-    }
-
-    @Override
-    public List addTabCompletionOptions(final ICommandSender sender, final String[] args)
-    {
-        if (args.length == 1) return getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
-        return null;
-    }
-
-    @Override
-    public void processCommand(ICommandSender sender, String[] args)
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
         EntityPlayerMP target;
 
         if (args.length == 0) target = getCommandSenderAsPlayer(sender);
-        else target = getPlayer(sender, args[0]);
+        else target = getPlayer(server, sender, args[0]);
 
         double x = target.posX;
         double z = target.posZ;
 
         int rad = 1;
-        if (args.length > 1) rad = parseIntWithMin(sender, args[1], 1);
+        if (args.length > 1) rad = parseInt(args[1], 1);
 
         int rockets = 1;
-        if (args.length > 2) rockets = parseIntWithMin(sender, args[2], 1);
+        if (args.length > 2) rockets = parseInt(args[2], 1);
 
         while (rockets -- > 0)
         {
-            ItemStack itemStack = new ItemStack(Items.fireworks);
+            ItemStack itemStack = new ItemStack(Items.FIREWORKS);
             NBTTagCompound fireworks = new NBTTagCompound();
             NBTTagList explosions = new NBTTagList();
 
@@ -134,5 +118,24 @@ public class CommandFireworks extends CommandBase
             itemStack.setTagCompound(root);
             target.worldObj.spawnEntityInWorld(new EntityFireworkRocket(target.worldObj, x + Constants.RANDOM.nextInt(rad) - rad / 2.0, target.posY, z + Constants.RANDOM.nextInt(rad) - rad / 2.0, itemStack));
         }
+    }
+
+    @Override
+    public int getRequiredPermissionLevel()
+    {
+        return 2;
+    }
+
+    @Override
+    public boolean isUsernameIndex(final String[] args, final int userIndex)
+    {
+        return userIndex == 0;
+    }
+
+    @Override
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
+    {
+        if (args.length == 1) return getListOfStringsMatchingLastWord(args, server.getAllUsernames());
+        return super.getTabCompletionOptions(server, sender, args, pos);
     }
 }

@@ -22,41 +22,52 @@
  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
  */
 
-package net.doubledoordev.d3commands.event;
+package net.doubledoordev.d3commands.entry;
 
-import com.google.common.collect.Maps;
-import net.doubledoordev.d3commands.util.BlockPosDim;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.doubledoordev.d3commands.D3Commands;
+import net.minecraft.command.ICommand;
+import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fml.common.Loader;
 
-import java.util.Map;
-import java.util.UUID;
-
-public class PlayerDeathEventHandler
+public abstract class CommandEntry
 {
-    public static final PlayerDeathEventHandler I = new PlayerDeathEventHandler();
-    private static final Map<UUID, BlockPosDim> MAP = Maps.newHashMap();
+    private final String name;
+    private final boolean forceDisable;
+    protected boolean enabled;
 
-    private PlayerDeathEventHandler()
+    public CommandEntry(String name, String... modIds)
     {
-    }
-
-    @SubscribeEvent
-    public void onPlayerDeath(LivingDeathEvent event)
-    {
-        Entity entity = event.getEntity();
-        if (entity instanceof EntityPlayerMP)
+        this.name = name;
+        boolean forceDisable = false;
+        if (modIds != null)
         {
-            MAP.put(entity.getUniqueID(), new BlockPosDim(entity));
+            for (String modId : modIds)
+            {
+                if (!Loader.isModLoaded(modId))
+                {
+                    forceDisable = true;
+                    D3Commands.getLogger().info("Command {} forced disabled because mod requirements are not met. {} is not loaded. Full list: {}", getUniqueName(), modId, modIds);
+                    break;
+                }
+            }
         }
+        this.forceDisable = forceDisable;
     }
 
-    public static BlockPosDim get(UUID uniqueID)
+    public boolean isEnabled()
     {
-        return MAP.get(uniqueID);
+        return !forceDisable && enabled;
+    }
+
+    public abstract ICommand getInstance();
+
+    public abstract void doConfig(Configuration configuration);
+
+    public String getUniqueName()
+    {
+        return name;
     }
 }

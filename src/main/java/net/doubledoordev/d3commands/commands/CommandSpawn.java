@@ -26,16 +26,18 @@
 
 package net.doubledoordev.d3commands.commands;
 
-import net.doubledoordev.d3commands.util.Location;
+import net.doubledoordev.d3commands.util.BlockPosDim;
 import net.minecraft.block.material.Material;
 import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class CommandSpawn extends CommandBase
@@ -53,6 +55,20 @@ public class CommandSpawn extends CommandBase
     }
 
     @Override
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    {
+        EntityPlayerMP target;
+
+        if (args.length == 0) target = getCommandSenderAsPlayer(sender);
+        else target = getPlayer(server, sender, args[0]);
+
+        World world = target.getEntityWorld();
+        BlockPosDim pos = new BlockPosDim(world.getTopSolidOrLiquidBlock(target.worldObj.getSpawnPoint()), target.dimension);
+        target.connection.setPlayerLocation(pos.getX(), pos.getY(), pos.getZ(), target.rotationYaw, target.rotationPitch);
+        sender.addChatMessage(new TextComponentTranslation("d3.cmd.tp.success", target.getDisplayName()).appendText(" ").appendSibling(pos.toClickableChatString()));
+    }
+
+    @Override
     public int getRequiredPermissionLevel()
     {
         return 2;
@@ -65,31 +81,9 @@ public class CommandSpawn extends CommandBase
     }
 
     @Override
-    public List addTabCompletionOptions(final ICommandSender sender, final String[] args)
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
-        if (args.length == 1) return getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
-        return null;
-    }
-
-    @Override
-    public void processCommand(ICommandSender sender, String[] args)
-    {
-        EntityPlayerMP target;
-
-        if (args.length == 0) target = getCommandSenderAsPlayer(sender);
-        else target = getPlayer(sender, args[0]);
-
-        ChunkCoordinates spawn = target.worldObj.getSpawnPoint();
-        World world = target.getEntityWorld();
-        for (int y = world.getActualHeight(); y > 0; y--)
-        {
-            if (world.getBlock(spawn.posX, y, spawn.posZ).getMaterial() != Material.air)
-            {
-                Location location = new Location(spawn.posX, y + 2, spawn.posZ, world.provider.dimensionId);
-                location.teleport(target);
-                sender.addChatMessage(new ChatComponentTranslation("d3.cmd.tp.success", target.getDisplayName()).appendText(" ").appendSibling(location.toClickableChatString()));
-                return;
-            }
-        }
+        if (args.length == 1) return getListOfStringsMatchingLastWord(args, server.getAllUsernames());
+        return super.getTabCompletionOptions(server, sender, args, pos);
     }
 }

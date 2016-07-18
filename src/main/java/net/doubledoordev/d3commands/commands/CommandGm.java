@@ -28,9 +28,6 @@ package net.doubledoordev.d3commands.commands;
 
 import net.minecraft.command.CommandGameMode;
 
-/**
- * Created by Wout on 28/10/2014.
- */
 public class CommandGm extends CommandGameMode
 {
     @Override
