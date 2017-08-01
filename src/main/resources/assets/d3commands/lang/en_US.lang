@@ -8,6 +8,8 @@ d3.cmd.back.failed=Could not find a death point to return to for %s
 
 d3.cmd.feed.success=Fed %s
 
+d3.cmd.highlight.success=Poofed fairy dust at %s
+
 d3.cmd.fly.success.on=I believe %s can fly!
 d3.cmd.fly.success.off=No more flying for %s
 

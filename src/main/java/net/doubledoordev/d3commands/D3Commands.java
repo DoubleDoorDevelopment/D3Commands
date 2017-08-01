@@ -86,7 +86,8 @@ public class D3Commands
                 new BasicCommandEntry(CommandPos.class, "pos", true, "Get other players coordinates."),
                 new BasicCommandEntry(CommandExplorers.class, "analiselocations", true, "Analise locations of online players."),
                 new BasicCommandEntry(CommandSmite.class, "smite", true, "Power! UNLIMITED POWER."),
-                new BasicCommandEntry(CommandFireworks.class, "fireworks", true, "Needs more fireworks.")
+                new BasicCommandEntry(CommandFireworks.class, "fireworks", true, "Needs more fireworks."),
+                new BasicCommandEntry(CommandHighlight.class, "heal", true, "Set/remove outline for a player.")
         };
         for (CommandEntry e : a)
         {
