@@ -39,6 +39,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.world.Teleporter;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
@@ -97,9 +99,14 @@ public class CommandTpx extends CommandBase
                     CommandBase.CoordinateArg yaw = parseCoordinate((double)target.rotationYaw, args.length > j ? args[j++] : "~", false);
                     CommandBase.CoordinateArg pitch = parseCoordinate((double)target.rotationPitch, args.length > j ? args[j] : "~", false);
 
-                    BlockPosDim dest;
-                    if (target.dimension != dim) target.changeDimension(dim);
+                    target.dismountRidingEntity();
+                    if (target.dimension != dim)
+                    {
+                        target = dimChange(target, dim);
+                        if (target == null) return;
+                    }
 
+                    BlockPosDim dest;
                     if (target instanceof EntityPlayerMP)
                     {
                         Set<SPacketPlayerPosLook.EnumFlags> set = EnumSet.noneOf(SPacketPlayerPosLook.EnumFlags.class);
@@ -115,7 +122,7 @@ public class CommandTpx extends CommandBase
                         target.dismountRidingEntity();
                         ((EntityPlayerMP)target).connection.setPlayerLocation(x.getAmount(), y.getAmount(), z.getAmount(), f, f1, set);
                         target.setRotationYawHead(f);
-                        dest = new BlockPosDim(x.getAmount(), y.getAmount(), z.getAmount(), dim);
+                        dest = new BlockPosDim(x.getResult(), y.getResult(), z.getResult(), dim);
                     }
                     else
                     {
@@ -133,8 +140,12 @@ public class CommandTpx extends CommandBase
             {
                 Entity dest = getEntity(server, sender, args[args.length - 1]);
 
-                if (target.dimension != dest.dimension) target.changeDimension(dest.dimension);
                 target.dismountRidingEntity();
+                if (target.dimension != dest.dimension)
+                {
+                    target = dimChange(target, dest.dimension);
+                    if (target == null) return;
+                }
 
                 if (target instanceof EntityPlayerMP)
                 {
@@ -148,6 +159,42 @@ public class CommandTpx extends CommandBase
                 }
             }
         }
+    }
+
+    private Entity dimChange(Entity target, int dimension)
+    {
+        if (target instanceof EntityPlayerMP)
+        {
+            MinecraftServer s = FMLCommonHandler.instance().getMinecraftServerInstance();
+            Teleporter t = new Teleporter(s.worldServerForDimension(dimension)) {
+                @Override
+                public void placeInPortal(Entity entityIn, float rotationYaw)
+                {
+
+                }
+
+                @Override
+                public boolean placeInExistingPortal(Entity entityIn, float rotationYaw)
+                {
+                    return true;
+                }
+
+                @Override
+                public boolean makePortal(Entity entityIn)
+                {
+                    return true;
+                }
+
+                @Override
+                public void removeStalePortalLocations(long worldTime)
+                {
+
+                }
+            };
+            s.getPlayerList().transferPlayerToDimension(((EntityPlayerMP) target), dimension, t);
+            return target;
+        }
+        return target.changeDimension(dimension);
     }
 
     @Override

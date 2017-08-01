@@ -75,7 +75,7 @@ public class BlockPosDim extends BlockPos
 
     public ITextComponent toClickableChatString()
     {
-        return new TextComponentString("[" + getX() + "X " + getY() + "Y " + getZ() + "Z]").setStyle(new Style().setClickEvent(
+        return new TextComponentString("[" + getX() + " " + getY() + " " + getZ() + "]").setStyle(new Style().setItalic(true).setClickEvent(
                 new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpx " + dim + " " + getX() + " " + getY() + " " + getZ())));
     }
 

@@ -30,7 +30,7 @@ apply plugin: "idea-utils"
 apply plugin: "maven"
 
 group = "net.doubledoordev.d3commands"
-version = "1.3.0"
+version = "1.3.1"
 
 targetCompatibility = 1.7
 sourceCompatibility = 1.7
@@ -60,6 +60,7 @@ if (System.getenv().BUILD_NUMBER != null) version += "." + System.getenv().BUILD
 //noinspection GroovyAssignabilityCheck
 processResources {
     from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
         expand 'version':project.version, 'mcversion':project.minecraft.version, 'modid':project.archivesBaseName, 'githuborg':githuborg, 'description':description, 'group':project.group, 'artifactId':project.archivesBaseName
     }
 
