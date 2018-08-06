@@ -1,0 +1,24 @@
+d3.cmd.config.cmd=D³指令
+d3.cmd.config.cmd.tooltip=启用或禁用指令
+
+d3.cmd.cmd.tps.dimInvalid=维度 %d 不存在.
+
+d3.cmd.back.success=传送 %s 返回到死亡点
+d3.cmd.back.failed=无法找到死亡点返回 %s
+
+d3.cmd.feed.success=已恢复 %s 的饥饿值
+
+d3.cmd.fly.success.on=我坚信 %s 能够飞翔!
+d3.cmd.fly.success.off=%s 不能再飞了哟
+
+d3.cmd.god.success.on=上帝为 %s 打开了一扇窗
+d3.cmd.god.success.off=上帝为 %s 关上了一扇门
+
+d3.cmd.heal.success=已恢复 %s 的生命值
+
+d3.cmd.kill.success=已杀死 %s
+
+d3.cmd.tp.success=传送 %s 到
+
+d3.cmd.key.success=已给幽灵按键到 %s
+d3.cmd.key.failed=幽灵按键似乎不存在Spectre key doesn't seem to exists.

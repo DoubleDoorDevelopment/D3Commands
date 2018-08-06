@@ -1,0 +1,20 @@
+[
+  {
+    "modid": "d3commands",
+    "name": "D^3Commands",
+    "description": "More useful commands for any server operator!",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "",
+    "updateUrl": "",
+    "authorList": [
+      ""
+    ],
+    "credits": "",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": [
+      ""
+    ]
+  }
+]
