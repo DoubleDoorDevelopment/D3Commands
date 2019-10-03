@@ -26,7 +26,9 @@
 
 package net.doubledoordev.d3commands.commands;
 
-import net.doubledoordev.d3commands.util.BlockPosDim;
+import java.util.List;
+import javax.annotation.Nullable;
+
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -36,8 +38,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 
-import javax.annotation.Nullable;
-import java.util.List;
+import net.doubledoordev.d3commands.ModConfig;
+import net.doubledoordev.d3commands.util.BlockPosDim;
 
 public class CommandPos extends CommandBase
 {
@@ -50,7 +52,13 @@ public class CommandPos extends CommandBase
     @Override
     public String getUsage(ICommandSender icommandsender)
     {
-        return "/pos <username>";
+        return "d3.cmd.pos.usage";
+    }
+
+    @Override
+    public int getRequiredPermissionLevel()
+    {
+        return ModConfig.posPermissionLevel;
     }
 
     @Override

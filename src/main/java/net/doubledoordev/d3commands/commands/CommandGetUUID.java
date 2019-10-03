@@ -26,7 +26,9 @@
 
 package net.doubledoordev.d3commands.commands;
 
-import com.mojang.authlib.GameProfile;
+import java.util.List;
+import javax.annotation.Nullable;
+
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -35,10 +37,11 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
-import javax.annotation.Nullable;
-import java.util.List;
+import com.mojang.authlib.GameProfile;
+import net.doubledoordev.d3commands.ModConfig;
 
 /**
  * @author Dries007
@@ -54,7 +57,7 @@ public class CommandGetUUID extends CommandBase
     @Override
     public String getUsage(ICommandSender p_71518_1_)
     {
-        return "/getuuid [username] [username 2] [...]";
+        return "d3.cmd.uuid.usage";
     }
 
     @Override
@@ -62,7 +65,7 @@ public class CommandGetUUID extends CommandBase
     {
         if (args.length == 0)
         {
-            sender.sendMessage(new TextComponentString("All online players:").setStyle(new Style().setColor(TextFormatting.GOLD)));
+            sender.sendMessage(new TextComponentTranslation("d3.cmd.uuid.online").setStyle(new Style().setColor(TextFormatting.GOLD)));
             for (GameProfile gp : server.getPlayerList().getOnlinePlayerProfiles())
             {
                 sender.sendMessage(new TextComponentString(gp.getName() + " -> " + gp.getId()));
@@ -70,11 +73,12 @@ public class CommandGetUUID extends CommandBase
         }
         else
         {
-            sender.sendMessage(new TextComponentString("All listed players:").setStyle(new Style().setColor(TextFormatting.GOLD)));
+            sender.sendMessage(new TextComponentTranslation("d3.cmd.uuid.all").setStyle(new Style().setColor(TextFormatting.GOLD)));
             for (String name : args)
             {
                 EntityPlayerMP player = server.getPlayerList().getPlayerByUsername(name);
-                if (player == null) sender.sendMessage(new TextComponentString("No player with name " + name).setStyle(new Style().setColor(TextFormatting.RED)));
+                if (player == null)
+                    sender.sendMessage(new TextComponentTranslation("d3.cmd.uuid.fail", name).setStyle(new Style().setColor(TextFormatting.RED)));
                 else sender.sendMessage(new TextComponentString(player.getDisplayNameString() + " -> " + player.getUniqueID()));
             }
         }
@@ -90,5 +94,11 @@ public class CommandGetUUID extends CommandBase
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
         return getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames());
+    }
+
+    @Override
+    public int getRequiredPermissionLevel()
+    {
+        return ModConfig.getUUIDPermissionLevel;
     }
 }

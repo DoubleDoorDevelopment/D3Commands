@@ -26,6 +26,9 @@
 
 package net.doubledoordev.d3commands.commands;
 
+import java.util.List;
+import javax.annotation.Nullable;
+
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -34,8 +37,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 
-import javax.annotation.Nullable;
-import java.util.List;
+import net.doubledoordev.d3commands.ModConfig;
 
 public class CommandHeal extends CommandBase
 {
@@ -48,7 +50,7 @@ public class CommandHeal extends CommandBase
     @Override
     public String getUsage(ICommandSender icommandsender)
     {
-        return "/heal [target player]";
+        return "d3.cmd.heal.usage";
     }
 
     @Override
@@ -67,7 +69,7 @@ public class CommandHeal extends CommandBase
     @Override
     public int getRequiredPermissionLevel()
     {
-        return 2;
+        return ModConfig.healPermissionLevel;
     }
 
     @Override
@@ -83,8 +85,8 @@ public class CommandHeal extends CommandBase
         return super.getTabCompletions(server, sender, args, pos);
     }
 
-    private void doHeal(EntityPlayerMP playerHeal)
+    private void doHeal(EntityPlayerMP player)
     {
-        playerHeal.setHealth(20);
+        player.setHealth(player.getMaxHealth());
     }
 }

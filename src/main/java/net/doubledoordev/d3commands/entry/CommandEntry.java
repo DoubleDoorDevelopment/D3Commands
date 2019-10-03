@@ -27,10 +27,11 @@
 
 package net.doubledoordev.d3commands.entry;
 
-import net.doubledoordev.d3commands.D3Commands;
 import net.minecraft.command.ICommand;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.Loader;
+
+import net.doubledoordev.d3commands.D3Commands;
 
 public abstract class CommandEntry
 {

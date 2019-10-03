@@ -26,8 +26,9 @@
 
 package net.doubledoordev.d3commands.commands;
 
-import net.doubledoordev.d3commands.event.PlayerDeathEventHandler;
-import net.doubledoordev.d3commands.util.BlockPosDim;
+import java.util.List;
+import javax.annotation.Nullable;
+
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -36,8 +37,9 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 
-import javax.annotation.Nullable;
-import java.util.List;
+import net.doubledoordev.d3commands.ModConfig;
+import net.doubledoordev.d3commands.event.PlayerDeathEventHandler;
+import net.doubledoordev.d3commands.util.BlockPosDim;
 
 public class CommandBack extends CommandBase
 {
@@ -50,7 +52,7 @@ public class CommandBack extends CommandBase
     @Override
     public String getUsage(ICommandSender icommandsender)
     {
-        return "/back - Teleports you back to where you died the last time.";
+        return "d3.cmd.back.usage";
     }
 
     @Override
@@ -78,7 +80,7 @@ public class CommandBack extends CommandBase
     @Override
     public int getRequiredPermissionLevel()
     {
-        return 2;
+        return ModConfig.backPermissionLevel;
     }
 
     @Override

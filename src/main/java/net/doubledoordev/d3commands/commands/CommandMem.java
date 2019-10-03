@@ -30,7 +30,9 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
+
+import net.doubledoordev.d3commands.ModConfig;
 
 public class CommandMem extends CommandBase
 {
@@ -43,7 +45,7 @@ public class CommandMem extends CommandBase
     @Override
     public String getUsage(ICommandSender icommandsender)
     {
-        return "/mem";
+        return "d3.cmd.mem.usage";
     }
 
     @Override
@@ -53,11 +55,17 @@ public class CommandMem extends CommandBase
         long max = Runtime.getRuntime().maxMemory() / 1024 / 1024;
         long free = Runtime.getRuntime().freeMemory() / 1024 / 1024;
 
-        sender.sendMessage(new TextComponentString("Currently assigned Memory: §5" + total + "MB"));
+        sender.sendMessage(new TextComponentTranslation("d3.cmd.mem.assigned", total));
         if (!(max == total))
         {
-            sender.sendMessage(new TextComponentString("Max assignable Memory: §5" + max + "MB"));
+            sender.sendMessage(new TextComponentTranslation("d3.cmd.mem.max", total));
         }
-        sender.sendMessage(new TextComponentString("Free assigned memory: §5" + free + "MB"));
+        sender.sendMessage(new TextComponentTranslation("d3.cmd.mem.free", free));
+    }
+
+    @Override
+    public int getRequiredPermissionLevel()
+    {
+        return ModConfig.memPermissionLevel;
     }
 }

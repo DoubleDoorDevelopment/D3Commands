@@ -27,16 +27,19 @@
 
 package net.doubledoordev.d3commands.util;
 
+import javax.annotation.concurrent.Immutable;
+
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.event.ClickEvent;
-
-import javax.annotation.concurrent.Immutable;
 
 @Immutable
 public class BlockPosDim extends BlockPos
@@ -49,10 +52,9 @@ public class BlockPosDim extends BlockPos
         this.dim = dim;
     }
 
-    public BlockPosDim(double x, double y, double z, int dim)
+    public static BlockPosDim getLocation(EntityPlayer target)
     {
-        super(x, y, z);
-        this.dim = dim;
+        return new BlockPosDim(target.getPosition(), target.dimension);
     }
 
     public BlockPosDim(Entity source)
@@ -61,10 +63,17 @@ public class BlockPosDim extends BlockPos
         this.dim = source.dimension;
     }
 
-    public BlockPosDim(Vec3d vec, int dim)
+    /**
+     * Creates a new NBTTagCompound from a BlockPos.
+     */
+    public static NBTTagCompound createPosDimTag(BlockPosDim pos)
     {
-        super(vec);
-        this.dim = dim;
+        NBTTagCompound nbttagcompound = new NBTTagCompound();
+        nbttagcompound.setInteger("X", pos.getX());
+        nbttagcompound.setInteger("Y", pos.getY());
+        nbttagcompound.setInteger("Z", pos.getZ());
+        nbttagcompound.setInteger("Dim", pos.dim);
+        return nbttagcompound;
     }
 
     public BlockPosDim(Vec3i source, int dim)
@@ -73,9 +82,42 @@ public class BlockPosDim extends BlockPos
         this.dim = dim;
     }
 
+    /**
+     * Creates a BlockPos object from the data stored in the passed NBTTagCompound.
+     */
+    public static BlockPosDim getPosDimFromTag(NBTTagCompound tag)
+    {
+        return new BlockPosDim(tag.getInteger("X"), tag.getInteger("Y"), tag.getInteger("Z"), tag.getInteger("Dim"));
+    }
+
+    // Unused.
+    public BlockPosDim(double x, double y, double z, int dim)
+    {
+        super(x, y, z);
+        this.dim = dim;
+    }
+
+    // Unused.
+    public BlockPosDim(Vec3d vec, int dim)
+    {
+        super(vec);
+        this.dim = dim;
+    }
+
+    public BlockPosDim(BlockPos blockPos, int dim)
+    {
+        super(blockPos);
+        this.dim = dim;
+    }
+
+    public int getDim()
+    {
+        return this.dim;
+    }
+
     public ITextComponent toClickableChatString()
     {
-        return new TextComponentString("[" + getX() + " " + getY() + " " + getZ() + "]").setStyle(new Style().setItalic(true).setClickEvent(
+        return new TextComponentString("[DIM:" + dim + " " + getX() + " " + getY() + " " + getZ() + "]").setStyle(new Style().setItalic(true).setColor(TextFormatting.LIGHT_PURPLE).setClickEvent(
                 new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpx " + dim + " " + getX() + " " + getY() + " " + getZ())));
     }
 

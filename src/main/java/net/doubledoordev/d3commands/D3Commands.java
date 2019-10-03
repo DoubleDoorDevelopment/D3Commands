@@ -26,12 +26,10 @@
 
 package net.doubledoordev.d3commands;
 
-import net.doubledoordev.d3commands.commands.*;
-import net.doubledoordev.d3commands.entry.BasicCommandEntry;
-import net.doubledoordev.d3commands.entry.CommandEntry;
-import net.doubledoordev.d3commands.entry.ItemCommandEntry;
-import net.doubledoordev.d3commands.event.PlayerDeathEventHandler;
-import net.doubledoordev.d3commands.util.Constants;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.logging.log4j.Logger;
 import net.minecraft.command.CommandHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.ConfigCategory;
@@ -42,14 +40,19 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import org.apache.logging.log4j.Logger;
 
-import java.util.HashMap;
-import java.util.Map;
+import net.doubledoordev.d3commands.commands.*;
+import net.doubledoordev.d3commands.entry.BasicCommandEntry;
+import net.doubledoordev.d3commands.entry.CommandEntry;
+import net.doubledoordev.d3commands.entry.ItemCommandEntry;
+import net.doubledoordev.d3commands.event.Eventhandler;
+import net.doubledoordev.d3commands.event.PlayerDeathEventHandler;
+import net.doubledoordev.d3commands.util.Constants;
 
-import static net.doubledoordev.d3commands.util.Constants.*;
+import static net.doubledoordev.d3commands.util.Constants.MODID;
+import static net.doubledoordev.d3commands.util.Constants.NAME;
 
-@Mod(modid = MODID, name = NAME /*, updateJSON = UPDATE_URL, guiFactory = MOD_GUI_FACTORY, dependencies = "after:D3Core", acceptableRemoteVersions = "*"*/)
+@Mod(modid = MODID, name = NAME, acceptableRemoteVersions = "*" /*, updateJSON = UPDATE_URL, guiFactory = MOD_GUI_FACTORY, dependencies = "after:D3Core", acceptableRemoteVersions = "*"*/)
 public class D3Commands
 {
     @SuppressWarnings("WeakerAccess")
@@ -68,6 +71,7 @@ public class D3Commands
         configuration = new Configuration(event.getSuggestedConfigurationFile());
         updateConfig();
         MinecraftForge.EVENT_BUS.register(PlayerDeathEventHandler.I);
+        MinecraftForge.EVENT_BUS.register(new Eventhandler());
 
         final CommandEntry[] a = new CommandEntry[] {
                 new BasicCommandEntry(CommandTps.class, "tps", true, "A TPS command for all players, not just ops."),
@@ -84,10 +88,24 @@ public class D3Commands
                 new BasicCommandEntry(CommandInvSee.class, "invsee", true, "Look at someone else's inventory"),
                 new BasicCommandEntry(CommandSpawn.class, "spawn", true, "Teleport to spawn"),
                 new BasicCommandEntry(CommandPos.class, "pos", true, "Get other players coordinates."),
-                new BasicCommandEntry(CommandExplorers.class, "analiselocations", true, "Analise locations of online players."),
+                new BasicCommandEntry(CommandExplorers.class, "analyzelocations", true, "Analyze locations of online players."),
                 new BasicCommandEntry(CommandSmite.class, "smite", true, "Power! UNLIMITED POWER."),
                 new BasicCommandEntry(CommandFireworks.class, "fireworks", true, "Needs more fireworks."),
-                new BasicCommandEntry(CommandHighlight.class, "heal", true, "Set/remove outline for a player.")
+                new BasicCommandEntry(CommandHighlight.class, "heal", true, "Set/remove outline for a player."),
+                new BasicCommandEntry(CommandLore.class, "lore", true, "Set/remove the lore on an item."),
+                new BasicCommandEntry(CommandLocatePortal.class, "portal", true, "Find the location a nether portal should be placed."),
+                new BasicCommandEntry(CommandBedTp.class, "tpbed", true, "Teleport you to a players bed."),
+                new BasicCommandEntry(CommandOfflineTp.class, "tpoffline", true, "Teleport to an offline players location."),
+                new BasicCommandEntry(CommandSpeed.class, "speed", true, "Changes walking/running speed of the player."),
+                new BasicCommandEntry(CommandNick.class, "nick", true, "Changes prefix, displayname or suffix of a player."),
+                new BasicCommandEntry(CommandName.class, "name", true, "Changes the name of the held item"),
+                new BasicCommandEntry(CommandExtinguish.class, "extinguish", true, "Put out fires near the player!"),
+                new BasicCommandEntry(CommandDrain.class, "drain", true, "Removes fluids near the player!"),
+                new BasicCommandEntry(CommandNightVision.class, "nightvision", true, "Toggleable night vision!"),
+                new BasicCommandEntry(CommandHome.class, "home", true, "Player specific home!"),
+                new BasicCommandEntry(CommandPing.class, "ping", true, "Ping!"),
+                new BasicCommandEntry(CommandClearDrops.class, "cleardrops", true, "Removes all item entities from the floor! (Keeps items that shouldn't despawn)")
+
         };
         for (CommandEntry e : a)
         {

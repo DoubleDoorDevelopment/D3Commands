@@ -26,6 +26,10 @@
 
 package net.doubledoordev.d3commands.commands;
 
+import java.text.DecimalFormat;
+import java.util.List;
+import javax.annotation.Nullable;
+
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -35,9 +39,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.DimensionManager;
 
-import javax.annotation.Nullable;
-import java.text.DecimalFormat;
-import java.util.List;
+import net.doubledoordev.d3commands.ModConfig;
 
 public class CommandTps extends CommandBase
 {
@@ -52,7 +54,7 @@ public class CommandTps extends CommandBase
     @Override
     public String getUsage(ICommandSender icommandsender)
     {
-        return "/tps [worldID]";
+        return "d3.cmd.cmd.tps.usage";
     }
 
     @Override
@@ -83,7 +85,7 @@ public class CommandTps extends CommandBase
     @Override
     public int getRequiredPermissionLevel()
     {
-        return 0;
+        return ModConfig.tpsPermissionLevel;
     }
 
     @Override

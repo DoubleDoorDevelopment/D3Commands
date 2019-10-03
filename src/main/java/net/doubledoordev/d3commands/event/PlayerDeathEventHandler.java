@@ -26,15 +26,16 @@
 
 package net.doubledoordev.d3commands.event;
 
+import java.util.Map;
+import java.util.UUID;
+
 import com.google.common.collect.Maps;
-import net.doubledoordev.d3commands.util.BlockPosDim;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-import java.util.Map;
-import java.util.UUID;
+import net.doubledoordev.d3commands.util.BlockPosDim;
 
 public class PlayerDeathEventHandler
 {

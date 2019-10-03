@@ -26,26 +26,28 @@
 
 package net.doubledoordev.d3commands.commands;
 
-import net.doubledoordev.d3commands.util.BlockPosDim;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Nullable;
+
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.world.Teleporter;
-import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraft.world.DimensionType;
+import net.minecraft.world.World;
+import net.minecraftforge.common.DimensionManager;
 
-import javax.annotation.Nullable;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
+import it.unimi.dsi.fastutil.ints.IntSortedSet;
+import net.doubledoordev.d3commands.ModConfig;
+import net.doubledoordev.d3commands.util.BlockPosDim;
+import net.doubledoordev.d3commands.util.DimChanger;
 
 public class CommandTpx extends CommandBase
 {
@@ -58,162 +60,104 @@ public class CommandTpx extends CommandBase
     @Override
     public String getUsage(ICommandSender icommandsender)
     {
-        return "/tpx <target> <destination> OR /tp <target> [Dimension ID] [x] [y] [z]";
+        return "d3.cmd.tpx.usage";
     }
 
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
-        if (args.length < 1)
-        {
-            throw new WrongUsageException(getUsage(sender));
-        }
-        else
-        {
-            int i = 0;
-            Entity target;
+        EntityPlayerMP target;
+        EntityPlayerMP anchor;
+        int dim;
 
-            if (args.length != 2 && args.length != 5 && args.length != 7)
-            {
+        //TODO: Document.
+        switch (args.length)
+        {
+            default:
+                throw new WrongUsageException(getUsage(sender));
+            case 1:
                 target = getCommandSenderAsPlayer(sender);
-            }
-            else
-            {
-                target = getEntity(server, sender, args[0]);
-                i = 1;
-            }
-
-            if (args.length != 1 && args.length != 2)
-            {
-                if (args.length < i + 3)
+                dim = parseInt(args[0]);
+                if (target.dimension != parseInt(args[0]))
                 {
-                    throw new WrongUsageException(getUsage(sender));
+                    DimChanger.changeDim(target, dim);
+                    World world = target.getEntityWorld();
+                    BlockPosDim pos = new BlockPosDim(world.getTopSolidOrLiquidBlock(target.world.getSpawnPoint()), target.dimension);
+                    target.connection.setPlayerLocation(pos.getX(), pos.getY(), pos.getZ(), target.cameraYaw, target.cameraPitch);
+                    sender.sendMessage(new TextComponentTranslation("d3.cmd.tpx.success.self", dim));
                 }
-                else if (target.world != null)
+                else sender.sendMessage(new TextComponentTranslation("d3.cmd.tpx.fail.self", dim));
+                break;
+            case 2:
+                target = getPlayer(server, sender, args[1]);
+                anchor = getPlayer(server, sender, args[0]);
+                dim = anchor.world.provider.getDimension();
+                if (target.dimension != anchor.dimension)
                 {
-                    int j = i;
-                    int dim = parseInt(args[j++]);
-                    CommandBase.CoordinateArg x = parseCoordinate(target.posX, args[j++], true);
-                    CommandBase.CoordinateArg y = parseCoordinate(target.posY, args[j++], -512, 512, false);
-                    CommandBase.CoordinateArg z = parseCoordinate(target.posZ, args[j++], true);
-                    CommandBase.CoordinateArg yaw = parseCoordinate((double)target.rotationYaw, args.length > j ? args[j++] : "~", false);
-                    CommandBase.CoordinateArg pitch = parseCoordinate((double)target.rotationPitch, args.length > j ? args[j] : "~", false);
-
-                    target.dismountRidingEntity();
-                    if (target.dimension != dim)
-                    {
-                        target = dimChange(target, dim);
-                        if (target == null) return;
-                    }
-
-                    BlockPosDim dest;
-                    if (target instanceof EntityPlayerMP)
-                    {
-                        Set<SPacketPlayerPosLook.EnumFlags> set = EnumSet.noneOf(SPacketPlayerPosLook.EnumFlags.class);
-                        if (x.isRelative()) set.add(SPacketPlayerPosLook.EnumFlags.X);
-                        if (y.isRelative()) set.add(SPacketPlayerPosLook.EnumFlags.Y);
-                        if (z.isRelative()) set.add(SPacketPlayerPosLook.EnumFlags.Z);
-                        if (pitch.isRelative()) set.add(SPacketPlayerPosLook.EnumFlags.X_ROT);
-                        if (yaw.isRelative()) set.add(SPacketPlayerPosLook.EnumFlags.Y_ROT);
-                        float f = (float)yaw.getAmount();
-                        if (!yaw.isRelative()) f = MathHelper.wrapDegrees(f);
-                        float f1 = (float)pitch.getAmount();
-                        if (!pitch.isRelative()) f1 = MathHelper.wrapDegrees(f1);
-                        target.dismountRidingEntity();
-                        ((EntityPlayerMP)target).connection.setPlayerLocation(x.getAmount(), y.getAmount(), z.getAmount(), f, f1, set);
-                        target.setRotationYawHead(f);
-                        dest = new BlockPosDim(x.getResult(), y.getResult(), z.getResult(), dim);
-                    }
-                    else
-                    {
-                        float f2 = (float)MathHelper.wrapDegrees(yaw.getResult());
-                        float f3 = (float)MathHelper.wrapDegrees(pitch.getResult());
-                        f3 = MathHelper.clamp(f3, -90.0F, 90.0F);
-                        target.setLocationAndAngles(x.getResult(), y.getResult(), z.getResult(), f2, f3);
-                        target.setRotationYawHead(f2);
-                        dest = new BlockPosDim(x.getResult(), y.getResult(), z.getResult(), dim);
-                    }
-                    sender.sendMessage(new TextComponentTranslation("d3.cmd.tp.success", target.getDisplayName()).appendText(" ").appendSibling(dest.toClickableChatString()));
+                    DimChanger.changeDim(target, dim);
+                    BlockPosDim pos1 = new BlockPosDim(anchor.getPosition(), target.dimension);
+                    sender.sendMessage(new TextComponentTranslation("d3.cmd.tpx.success.other", target.getDisplayName(), anchor.getDisplayName(), dim).appendText(" ").appendSibling(pos1.toClickableChatString()));
                 }
-            }
-            else
-            {
-                Entity dest = getEntity(server, sender, args[args.length - 1]);
-
-                target.dismountRidingEntity();
-                if (target.dimension != dest.dimension)
+                else sender.sendMessage(new TextComponentTranslation("d3.cmd.tpx.fail.other", dim));
+                break;
+            case 4:
+                target = getCommandSenderAsPlayer(sender);
+                dim = parseInt(args[0]);
+                Vec3d vec3d = sender.getPositionVector();
+                CommandBase.CoordinateArg xPos = parseCoordinate(vec3d.x, args[1], true);
+                CommandBase.CoordinateArg yPos = parseCoordinate(vec3d.y, args[2], -512, 512, false);
+                CommandBase.CoordinateArg zPos = parseCoordinate(vec3d.z, args[3], true);
+                if (target.dimension != parseInt(args[0]))
                 {
-                    target = dimChange(target, dest.dimension);
-                    if (target == null) return;
+                    DimChanger.changeDim(target, dim);
+                    target.connection.setPlayerLocation(xPos.getResult(), yPos.getResult(), zPos.getResult(), target.cameraYaw, target.cameraPitch);
+                    BlockPosDim pos2 = new BlockPosDim(target.getPosition(), target.dimension);
+                    sender.sendMessage(new TextComponentTranslation("d3.cmd.tpx.success.self.pos", dim).appendText(" ").appendSibling(pos2.toClickableChatString()));
                 }
-
-                if (target instanceof EntityPlayerMP)
+                else sender.sendMessage(new TextComponentTranslation("d3.cmd.tpx.fail.self.pos", dim));
+                break;
+            case 5:
+                target = getPlayer(server, sender, args[0]);
+                dim = parseInt(args[1]);
+                Vec3d vec3d1 = sender.getPositionVector();
+                CommandBase.CoordinateArg xPos1 = parseCoordinate(vec3d1.x, args[1], true);
+                CommandBase.CoordinateArg yPos1 = parseCoordinate(vec3d1.y, args[2], -512, 512, false);
+                CommandBase.CoordinateArg zPos1 = parseCoordinate(vec3d1.z, args[3], true);
+                if (target.dimension != parseInt(args[0]))
                 {
-                    ((EntityPlayerMP)target).connection.setPlayerLocation(dest.posX, dest.posY, dest.posZ, dest.rotationYaw, dest.rotationPitch);
-                    sender.sendMessage(new TextComponentTranslation("d3.cmd.tp.success", target.getDisplayName()).appendText(" ").appendSibling(new TextComponentString(((EntityPlayerMP) dest).getDisplayNameString())));
+                    DimChanger.changeDim(target, dim);
+                    target.connection.setPlayerLocation(xPos1.getResult(), yPos1.getResult(), zPos1.getResult(), target.cameraYaw, target.cameraPitch);
+                    BlockPosDim pos3 = new BlockPosDim(target.getPosition(), target.dimension);
+                    sender.sendMessage(new TextComponentTranslation("d3.cmd.tpx.success.other.pos", target.getDisplayName(), dim).appendText(" ").appendSibling(pos3.toClickableChatString()));
                 }
                 else
-                {
-                    target.setLocationAndAngles(dest.posX, dest.posY, dest.posZ, dest.rotationYaw, dest.rotationPitch);
-                    sender.sendMessage(new TextComponentTranslation("d3.cmd.tp.success", target.getDisplayName()).appendText(" ").appendSibling(new TextComponentString(dest.getName())));
-                }
-            }
+                    sender.sendMessage(new TextComponentTranslation("d3.cmd.tpx.fail.other.pos", target.getDisplayName(), dim));
+                break;
         }
-    }
-
-    private Entity dimChange(Entity target, int dimension)
-    {
-        if (target instanceof EntityPlayerMP)
-        {
-            MinecraftServer s = FMLCommonHandler.instance().getMinecraftServerInstance();
-            //was worldserverfordimention
-            Teleporter t = new Teleporter(s.getWorld(dimension)) {
-                @Override
-                public void placeInPortal(Entity entityIn, float rotationYaw)
-                {
-
-                }
-
-                @Override
-                public boolean placeInExistingPortal(Entity entityIn, float rotationYaw)
-                {
-                    return true;
-                }
-
-                @Override
-                public boolean makePortal(Entity entityIn)
-                {
-                    return true;
-                }
-
-                @Override
-                public void removeStalePortalLocations(long worldTime)
-                {
-
-                }
-            };
-            s.getPlayerList().transferPlayerToDimension(((EntityPlayerMP) target), dimension, t);
-            return target;
-        }
-        return target.changeDimension(dimension);
     }
 
     @Override
     public int getRequiredPermissionLevel()
     {
-        return 2;
-    }
-
-    @Override
-    public boolean isUsernameIndex(final String[] args, final int userIndex)
-    {
-        return userIndex == 0 || userIndex == 1;
+        return ModConfig.tpxPermissionLevel;
     }
 
     @Override
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
-        if (args.length == 1) return getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames());
+        ArrayList<String> dims = new ArrayList<>();
+        for (Map.Entry<DimensionType, IntSortedSet> data : DimensionManager.getRegisteredDimensions().entrySet())
+        {
+            dims.add(String.valueOf(data.getValue().iterator().next()));
+        }
+
+        switch (args.length)
+        {
+            case 1:
+                return getListOfStringsMatchingLastWord(args, dims);
+            case 2:
+                return getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames());
+        }
         return super.getTabCompletions(server, sender, args, pos);
     }
 }

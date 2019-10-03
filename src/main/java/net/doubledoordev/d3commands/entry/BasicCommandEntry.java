@@ -28,9 +28,10 @@
 package net.doubledoordev.d3commands.entry;
 
 import com.google.common.base.Throwables;
-import net.doubledoordev.d3commands.util.Constants;
 import net.minecraft.command.ICommand;
 import net.minecraftforge.common.config.Configuration;
+
+import net.doubledoordev.d3commands.util.Constants;
 
 /**
  * Uses lazy instantiation because it avoids class loading mods that may not exist.

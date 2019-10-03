@@ -27,6 +27,11 @@
 
 package net.doubledoordev.d3commands.entry;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import javax.annotation.Nullable;
+
 import com.google.common.base.Strings;
 import net.minecraft.command.*;
 import net.minecraft.entity.item.EntityItem;
@@ -40,16 +45,12 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
 
-import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import static net.minecraft.command.CommandBase.*;
 
 /**
  * This actually IS the command :)
  */
+//TODO: Do we even keep this?
 public class ItemCommandEntry extends CommandEntry implements ICommand
 {
     private String name;
@@ -158,7 +159,7 @@ public class ItemCommandEntry extends CommandEntry implements ICommand
     @Override
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
-        return allowUsername && args.length == 1 ? getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames()) : Collections.<String>emptyList();
+        return allowUsername && args.length == 1 ? getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames()) : Collections.emptyList();
     }
 
     @Override

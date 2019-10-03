@@ -26,8 +26,9 @@
 
 package net.doubledoordev.d3commands.commands;
 
-import net.doubledoordev.d3commands.util.BlockPosDim;
-import net.minecraft.block.material.Material;
+import java.util.List;
+import javax.annotation.Nullable;
+
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -37,8 +38,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
-import javax.annotation.Nullable;
-import java.util.List;
+import net.doubledoordev.d3commands.ModConfig;
+import net.doubledoordev.d3commands.util.BlockPosDim;
 
 public class CommandTop extends CommandBase
 {
@@ -51,9 +52,10 @@ public class CommandTop extends CommandBase
     @Override
     public String getUsage(ICommandSender icommandsender)
     {
-        return "/top [target]";
+        return "d3.cmd.top.usage";
     }
 
+    //TODO: Fix translations for this. ???
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
@@ -71,7 +73,7 @@ public class CommandTop extends CommandBase
     @Override
     public int getRequiredPermissionLevel()
     {
-        return 2;
+        return ModConfig.topPermissionLevel;
     }
 
     @Override

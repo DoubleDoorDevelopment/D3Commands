@@ -26,6 +26,9 @@
 
 package net.doubledoordev.d3commands.commands;
 
+import java.util.List;
+import javax.annotation.Nullable;
+
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -34,8 +37,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 
-import javax.annotation.Nullable;
-import java.util.List;
+import net.doubledoordev.d3commands.ModConfig;
 
 public class CommandGod extends CommandBase
 {
@@ -48,7 +50,7 @@ public class CommandGod extends CommandBase
     @Override
     public String getUsage(ICommandSender icommandsender)
     {
-        return "/god [target player]";
+        return "d3.cmd.god.usage";
     }
 
     @Override
@@ -56,8 +58,16 @@ public class CommandGod extends CommandBase
     {
         EntityPlayerMP target;
 
-        if (args.length == 0) target = getCommandSenderAsPlayer(sender);
-        else target = getPlayer(server, sender, args[0]);
+        if (args.length == 0)
+            target = getCommandSenderAsPlayer(sender);
+        else
+            target = getPlayer(server, sender, args[0]);
+
+        if (target.isCreative() || target.isSpectator())
+        {
+            sender.sendMessage(new TextComponentTranslation("d3.cmd.god.gamemode.fail", target.getDisplayName()));
+            return;
+        }
 
         boolean on = doGod(target);
 
@@ -68,7 +78,7 @@ public class CommandGod extends CommandBase
     @Override
     public int getRequiredPermissionLevel()
     {
-        return 2;
+        return ModConfig.godPermissionLevel;
     }
 
     @Override

@@ -26,7 +26,9 @@
 
 package net.doubledoordev.d3commands.commands;
 
-import net.doubledoordev.d3commands.util.Constants;
+import java.util.List;
+import javax.annotation.Nullable;
+
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -39,8 +41,8 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 
-import javax.annotation.Nullable;
-import java.util.List;
+import net.doubledoordev.d3commands.ModConfig;
+import net.doubledoordev.d3commands.util.Constants;
 
 public class CommandFireworks extends CommandBase
 {
@@ -53,7 +55,7 @@ public class CommandFireworks extends CommandBase
     @Override
     public String getUsage(ICommandSender icommandsender)
     {
-        return "/fireworks [player] [radius] [rockets]";
+        return "d3.cmd.fireworks.usage";
     }
 
     @Override
@@ -123,7 +125,7 @@ public class CommandFireworks extends CommandBase
     @Override
     public int getRequiredPermissionLevel()
     {
-        return 2;
+        return ModConfig.fireworksPermissionLevel;
     }
 
     @Override

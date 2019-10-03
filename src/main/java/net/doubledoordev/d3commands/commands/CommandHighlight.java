@@ -26,23 +26,18 @@
 
 package net.doubledoordev.d3commands.commands;
 
+import java.util.List;
+import javax.annotation.Nullable;
+
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.command.PlayerNotFoundException;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.network.play.server.SPacketEntityMetadata;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraftforge.common.util.FakePlayer;
 
-import javax.annotation.Nullable;
-import java.util.List;
+import net.doubledoordev.d3commands.ModConfig;
 
 public class CommandHighlight extends CommandBase
 {
@@ -55,7 +50,7 @@ public class CommandHighlight extends CommandBase
     @Override
     public String getUsage(ICommandSender icommandsender)
     {
-        return "/highlight [target] [true|false]";
+        return "d3.cmd.highlight.usage";
     }
 
     @Override
@@ -106,7 +101,7 @@ public class CommandHighlight extends CommandBase
     @Override
     public int getRequiredPermissionLevel()
     {
-        return 2;
+        return ModConfig.highlightPermissionLevel;
     }
 
     @Override

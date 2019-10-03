@@ -26,7 +26,8 @@
 
 package net.doubledoordev.d3commands.commands;
 
-import net.doubledoordev.d3commands.util.BlockPosDim;
+import java.util.TreeSet;
+
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -39,7 +40,8 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
 
-import java.util.TreeSet;
+import net.doubledoordev.d3commands.ModConfig;
+import net.doubledoordev.d3commands.util.BlockPosDim;
 
 public class CommandExplorers extends CommandBase
 {
@@ -52,7 +54,7 @@ public class CommandExplorers extends CommandBase
     @Override
     public String getUsage(ICommandSender icommandsender)
     {
-        return "/explorers [amount of players] [dimension] [x z]";
+        return "d3.cmd.explorers.usage";
     }
 
     @Override
@@ -105,5 +107,11 @@ public class CommandExplorers extends CommandBase
             if (o instanceof Data) return distance - ((Data) o).distance;
             return 0;
         }
+    }
+
+    @Override
+    public int getRequiredPermissionLevel()
+    {
+        return ModConfig.explorersPermissionLevel;
     }
 }

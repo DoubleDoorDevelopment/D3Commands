@@ -26,7 +26,9 @@
 
 package net.doubledoordev.d3commands.commands;
 
-import net.doubledoordev.d3commands.util.Constants;
+import java.util.List;
+import javax.annotation.Nullable;
+
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -35,8 +37,8 @@ import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 
-import javax.annotation.Nullable;
-import java.util.List;
+import net.doubledoordev.d3commands.ModConfig;
+import net.doubledoordev.d3commands.util.Constants;
 
 public class CommandSmite extends CommandBase
 {
@@ -49,7 +51,7 @@ public class CommandSmite extends CommandBase
     @Override
     public String getUsage(ICommandSender icommandsender)
     {
-        return "/smite [target] [radius] [strikes]";
+        return "d3.cmd.smite.usage";
     }
 
     @Override
@@ -91,7 +93,7 @@ public class CommandSmite extends CommandBase
     @Override
     public int getRequiredPermissionLevel()
     {
-        return 2;
+        return ModConfig.smitePermissionLevel;
     }
 
     @Override

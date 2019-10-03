@@ -26,7 +26,16 @@
 
 package net.doubledoordev.d3commands.commands;
 
+import net.minecraft.command.CommandException;
 import net.minecraft.command.CommandGameMode;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.command.WrongUsageException;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.world.GameType;
+
+import net.doubledoordev.d3commands.ModConfig;
 
 public class CommandGm extends CommandGameMode
 {
@@ -34,5 +43,37 @@ public class CommandGm extends CommandGameMode
     public String getName()
     {
         return "gm";
+    }
+
+    @Override
+    public int getRequiredPermissionLevel()
+    {
+        return ModConfig.gmPermissionLevel;
+    }
+
+    @Override
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    {
+        EntityPlayerMP target;
+        GameType gametype;
+
+        switch (args.length)
+        {
+            default:
+                throw new WrongUsageException(getUsage(sender));
+            case 1:
+                gametype = getGameModeFromCommand(sender, args[0]);
+                target = getCommandSenderAsPlayer(sender);
+                target.setGameType(gametype);
+                sender.sendMessage(new TextComponentTranslation("d3.cmd.gm.success.self", gametype.getName()));
+                break;
+            case 2:
+                gametype = getGameModeFromCommand(sender, args[0]);
+                target = getPlayer(server, sender, args[1]);
+                target.setGameType(gametype);
+                target.sendMessage(new TextComponentTranslation("d3.cmd.gm.success.target", gametype.getName()));
+                sender.sendMessage(new TextComponentTranslation("d3.cmd.gm.success.on.other", target.getName(), gametype.getName()));
+                break;
+        }
     }
 }

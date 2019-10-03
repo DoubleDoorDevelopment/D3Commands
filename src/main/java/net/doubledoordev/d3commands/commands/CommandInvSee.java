@@ -26,30 +26,28 @@
 
 package net.doubledoordev.d3commands.commands;
 
-import com.mojang.authlib.GameProfile;
-import net.doubledoordev.d3commands.util.FakePlayerInventory;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import javax.annotation.Nullable;
+
 import net.minecraft.command.*;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.InventoryEnderChest;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-import javax.annotation.Nullable;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import net.doubledoordev.d3commands.ModConfig;
+import net.doubledoordev.d3commands.util.FakePlayerExtraInventory;
+import net.doubledoordev.d3commands.util.PlayerGetter;
 
 public class CommandInvSee extends CommandBase
 {
+    EntityPlayer target;
     @Override
     public String getName()
     {
@@ -59,58 +57,73 @@ public class CommandInvSee extends CommandBase
     @Override
     public String getUsage(ICommandSender icommandsender)
     {
-        return "/invsee <target player> ['enderchest']";
+        return "d3.cmd.invsee.usage";
     }
 
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
-        if (args.length < 1) throw new WrongUsageException(getUsage(sender));
-
         EntityPlayerMP host = getCommandSenderAsPlayer(sender);
 
-        EntityPlayerMP target = getPlayerOrOffline(server, sender, args[0]);
-        if (target == null) throw new PlayerNotFoundException("Player not Found!");
+        if (args.length == 0)
+            throw new WrongUsageException(getUsage(sender));
+        //TODO: Handle this if nothing is there. (I think this was done?)
+        target = PlayerGetter.onlineOrOffline(server, sender, args[0]);
 
-        if (args.length == 2 && args[1].equalsIgnoreCase("enderchest"))
+        // If the target is null we can't do anything.
+        if (target == null) throw new PlayerNotFoundException("d3.cmd.invsee.fail.player.missing", args[0]);
+
+        switch (args.length)
         {
-            InventoryEnderChest inv = new InventoryEnderChest()
-            {
-                @Override
-                public void closeInventory(EntityPlayer player) {}
-
-                @Override
-                public void openInventory(EntityPlayer player) {}
-
-                @Override
-                public ItemStack decrStackSize(int p_70298_1_, int p_70298_2_)
+            case 1:
+                //Catch if the person is trying to look at there own inventory and block it.
+                if (target == host)
+                    throw new SyntaxErrorException("d3.cmd.invsee.fail.player.self");
+                //Get the current dim of the target.
+                int dim = target.dimension;
+                //Display the GUI.
+                host.displayGUIChest(new FakePlayerExtraInventory((EntityPlayerMP) target));
+                //While the container is open check the dim of the target. Close if they don't match.
+                //while (host.openContainer instanceof ContainerChest)
+                if (target.dimension != dim)
+                    host.closeContainer();
+                //If the target disconnects then close the GUI.
+                if (((EntityPlayerMP) target).hasDisconnected())
+                    host.closeContainer();
+                break;
+            case 2:
+                switch (args[1].toLowerCase())
                 {
-                    return null;
-                }
+                    case "enderchest":
+                        // New enderchest UI.
+                        InventoryEnderChest inv = new InventoryEnderChest()
+                        {
+                            @Override
+                            public void openInventory(EntityPlayer player) {}
 
-                @Override
-                public boolean isItemValidForSlot(int p_94041_1_, ItemStack p_94041_2_)
-                {
-                    return false;
-                }
-            };
+                            @Override
+                            public void closeInventory(EntityPlayer player) {}
+                        };
+                        // Load the enderchest NBT somehow?
+                        inv.loadInventoryFromNBT(target.getInventoryEnderChest().saveInventoryToNBT());
 
-            inv.loadInventoryFromNBT(target.getInventoryEnderChest().saveInventoryToNBT());
-            String name = target.getDisplayNameString() + " Unmodifiable!";
-            if (name.length() > 32) name = "Unmodifiable!";
-            inv.setCustomName(name);
-            host.displayGUIChest(inv);
-        }
-        else // non enderchest
-        {
-            host.displayGUIChest(new FakePlayerInventory(target));
+                        // Set the name of the inventory
+                        inv.setCustomName(target.getDisplayNameString());
+
+                        // Display the chest.
+                        host.displayGUIChest(inv);
+                        break;
+                }
+                break;
+            default:
+                throw new WrongUsageException(getUsage(sender));
         }
     }
 
     @Override
     public int getRequiredPermissionLevel()
     {
-        return 2;
+        return ModConfig.invseePermissionLevel;
     }
 
     @Override
@@ -125,43 +138,19 @@ public class CommandInvSee extends CommandBase
         if (args.length == 1)
         {
             Set<String> names = new HashSet<>();
-            for (String name : server.getOnlinePlayerNames()) names.add(name);
-            for (String name : server.getPlayerList().getAvailablePlayerDat()) names.add(name);
+            Collections.addAll(names, server.getOnlinePlayerNames());
+            Collections.addAll(names, server.getPlayerList().getAvailablePlayerDat());
             return getListOfStringsMatchingLastWord(args, names);
         }
         else if (args.length == 2) return getListOfStringsMatchingLastWord(args, "enderchest");
         return super.getTabCompletions(server, sender, args, pos);
     }
 
-    private EntityPlayerMP getPlayerOrOffline(MinecraftServer server, ICommandSender sender, String name)
+    @SubscribeEvent
+    public void playerDataisSaving(PlayerEvent.SaveToFile event)
     {
-        try
-        {
-            return getPlayer(server, sender, name);
-        }
-        catch (PlayerNotFoundException e)
-        {
-            try
-            {
-                File playerDataFolder = new File(server.worlds[0].getSaveHandler().getWorldDirectory(), "playerdata");
-                File playerDataFile = new File(playerDataFolder, name + ".dat");
-                NBTTagCompound playerData = CompressedStreamTools.readCompressed(new FileInputStream(playerDataFile));
-                UUID uuid = UUID.fromString(name);
-                GameProfile gameProfile = server.getPlayerProfileCache().getProfileByUUID(uuid);
-                if (gameProfile == null) gameProfile = new GameProfile(uuid, name);
-                FakePlayer fakeplayer = new FakePlayer(server.worlds[0], gameProfile);
-                fakeplayer.readEntityFromNBT(playerData);
-                return fakeplayer;
-            }
-            catch (IOException ignored)
-            {
+        if (target.getUniqueID().toString().equals(event.getPlayerUUID()))
+            target.closeScreen();
 
-            }
-        }
-        catch (CommandException e)
-        {
-            e.printStackTrace();
-        }
-        return null;
     }
 }

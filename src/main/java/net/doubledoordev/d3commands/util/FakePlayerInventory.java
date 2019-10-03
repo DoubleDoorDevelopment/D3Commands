@@ -29,12 +29,13 @@ package net.doubledoordev.d3commands.util;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 
-import javax.annotation.Nullable;
+
 
 /**
  * @author Dries007
@@ -42,19 +43,18 @@ import javax.annotation.Nullable;
 public class FakePlayerInventory implements IInventory
 {
     private String name;
-    private final NonNullList<ItemStack> stacks;
+    private final NonNullList<ItemStack> maininventory;
 
     public FakePlayerInventory(EntityPlayerMP inv)
     {
-        name = inv.getDisplayNameString() + " Unmodifiable!";
-        if (name.length() > 32) name = "Unmodifiable!";
-        stacks = inv.inventory.mainInventory;
+        name = inv.getDisplayNameString();
+        maininventory = inv.inventory.mainInventory;
     }
 
     @Override
     public int getSizeInventory()
     {
-        return stacks.size();
+        return maininventory.size();
     }
 
     @Override
@@ -66,26 +66,47 @@ public class FakePlayerInventory implements IInventory
     @Override
     public ItemStack getStackInSlot(int slot)
     {
-        return stacks.get(slot);
+        return slot >= 0 && slot < maininventory.size() ? maininventory.get(slot) : ItemStack.EMPTY;
     }
 
     @Override
-    public ItemStack decrStackSize(int p_70298_1_, int p_70298_2_)
+    public ItemStack decrStackSize(int index, int count)
     {
-        return null;
+        ItemStack itemstack = ItemStackHelper.getAndSplit(maininventory, index, count);
+
+        if (!itemstack.isEmpty())
+        {
+            this.markDirty();
+        }
+
+        return itemstack;
     }
 
-    @Nullable
     @Override
     public ItemStack removeStackFromSlot(int index)
     {
-        return null;
+        ItemStack itemstack = maininventory.get(index);
+
+        if (itemstack.isEmpty())
+        {
+            return ItemStack.EMPTY;
+        }
+        else
+        {
+            maininventory.set(index, ItemStack.EMPTY);
+            return itemstack;
+        }
     }
 
     @Override
-    public void setInventorySlotContents(int p_70299_1_, ItemStack p_70299_2_)
+    public void setInventorySlotContents(int index, ItemStack itemStack)
     {
+        maininventory.set(index, itemStack);
 
+        if (!itemStack.isEmpty() && itemStack.getCount() > this.getInventoryStackLimit())
+        {
+            itemStack.setCount(this.getInventoryStackLimit());
+        }
     }
 
     @Override
@@ -121,7 +142,7 @@ public class FakePlayerInventory implements IInventory
     @Override
     public boolean isItemValidForSlot(int p_94041_1_, ItemStack p_94041_2_)
     {
-        return false;
+        return true;
     }
 
     @Override
